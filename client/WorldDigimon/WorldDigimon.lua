@@ -4,8 +4,10 @@ local addon = CreateFrame("Frame", "WorldDigimonEvents")
 local bar = CreateFrame("Frame", "WorldDigimonCombatBar", UIParent)
 bar:SetFrameStrata("HIGH")
 bar:SetFrameLevel(100)
-bar:SetSize(510, 62)
-bar:SetPoint("BOTTOMLEFT", ActionButton1, "BOTTOMLEFT", -6, -5)
+bar:SetSize(510, 66)
+-- A separate companion row above the stock bottom bars. Children must anchor
+-- to this frame too; moving only its backdrop leaves the buttons underneath.
+bar:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, 148)
 bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
     edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 16,
     edgeSize = 12, insets = {left = 3, right = 3, top = 3, bottom = 3}})
@@ -28,7 +30,6 @@ title:SetText("Dispositivo Sagrado")
 tinsert(UISpecialFrames, "WorldDigimonMenu")
 
 local buttons = {}
-local originalAlpha = {}
 local state = {active = 0, hp = 0, focus = 0, slots = {}}
 local wantedFight = false
 local receivedAt = 0
@@ -87,18 +88,9 @@ local function setFight(enabled)
         CloseGossip()
         menu:Hide()
         bar:Show()
-        for i = 1, 12 do
-            local original = _G["ActionButton" .. i]
-            if originalAlpha[i] == nil then originalAlpha[i] = original:GetAlpha() end
-            original:SetAlpha(0)
-        end
         sync()
     else
         bar:Hide()
-        for i, alpha in pairs(originalAlpha) do
-            _G["ActionButton" .. i]:SetAlpha(alpha)
-        end
-        originalAlpha = {}
     end
     bindBar()
 end
@@ -124,12 +116,11 @@ end
 
 for i, action in ipairs(actions) do
     local button = CreateFrame("CheckButton", "WorldDigimonAction" .. i, bar, "SecureActionButtonTemplate")
-    -- Secure templates need explicit layers; raising only the parent leaves
-    -- the original action buttons above these on the actual 3.3.5a client.
+    -- Explicit layers keep the controls above their own backdrop.
     button:SetFrameStrata("HIGH")
     button:SetFrameLevel(120)
     button:SetSize(36, 36)
-    button:SetPoint("BOTTOMLEFT", _G["ActionButton" .. i], "BOTTOMLEFT")
+    button:SetPoint("BOTTOMLEFT", bar, "BOTTOMLEFT", 10 + (i - 1) * 41, 10)
     button:RegisterForClicks("AnyUp")
     button:SetAttribute("type", "macro")
     button:SetAttribute("macrotext", action[2] and ("/s .digimon " .. action[2]) or "/digimon")

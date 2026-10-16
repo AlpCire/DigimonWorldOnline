@@ -16,6 +16,8 @@ function frameMethods:GetAlpha() return self.alpha or 1 end
 function frameMethods:SetAlpha(value) assert(not combat); self.alpha = value end
 function frameMethods:SetFrameStrata(value) self.strata = value end
 function frameMethods:SetFrameLevel(value) self.level = value end
+function frameMethods:SetPoint(...) self.point = {...} end
+function frameMethods:SetSize(width, height) self.width, self.height = width, height end
 function frameMethods:GetItem() return "Dispositivo", "item:900110:0:0:0" end
 function frameMethods:ClearLines() end
 function frameMethods:SetAttribute(key, value)
@@ -37,7 +39,7 @@ function frameMethods:SetTexture(value) self.texture = value end
 function frameMethods:SetCooldown(start, duration) self.duration = duration end
 function frameMethods:CreateTexture() return frame() end
 function frameMethods:CreateFontString() return frame() end
-for _, name in ipairs({"SetSize", "SetPoint", "SetBackdrop", "SetBackdropColor",
+for _, name in ipairs({"SetBackdrop", "SetBackdropColor",
     "SetAllPoints", "SetNormalTexture", "SetPushedTexture", "SetHighlightTexture", "RegisterForClicks",
     "RegisterEvent", "SetVertexColor", "SetOwner", "AddLine"}) do
     frameMethods[name] = function() end
@@ -101,7 +103,19 @@ assert(bar.label.text == goodText, "invalid or foreign snapshot accepted")
 
 SlashCmdList.WORLDDIGIMON("luchar")
 assert(bar:IsShown() and bindings["3"] == "WorldDigimonAction3")
-assert(ActionButton1:GetAlpha() == 0 and ActionButton2:GetAlpha() == 0)
+assert(ActionButton1:GetAlpha() == 1 and ActionButton2:GetAlpha() == 0.6, "native bar was hidden")
+assert(bar.point[1] == "BOTTOM" and bar.point[2] == UIParent and bar.point[5] > 120,
+    "companion bar must occupy its own row above the stock bottom bars")
+local previousRight = 0
+for i = 1, 12 do
+    local button = frames["WorldDigimonAction" .. i]
+    local point = button.point
+    assert(point[1] == "BOTTOMLEFT" and point[2] == bar and point[3] == "BOTTOMLEFT",
+        "companion control still anchored to the native action bar")
+    assert(point[4] >= previousRight and point[5] > 0 and point[4] + button.width < bar.width
+        and point[5] + button.height < bar.height, "controls overlap or escape the companion row")
+    previousRight = point[4] + button.width
+end
 assert(frames.WorldDigimonAction3.strata == "HIGH" and frames.WorldDigimonAction3.level > bar.level)
 assert(frames.WorldDigimonAction3.cooldown.level > frames.WorldDigimonAction3.level)
 assert(frames.WorldDigimonAction3.attributes.macrotext == "/s .digimon cast 1")
@@ -133,4 +147,4 @@ hooks.ContainerFrame_Update(bag)
 assert(device.texture == "Interface\\Icons\\INV_Misc_Book_07")
 GameTooltip.scripts.OnTooltipSetItem(GameTooltip)
 assert(GameTooltip.text == "Dispositivo Sagrado")
-print("PASS: equipped slots, cooldown, own-server messages, malformed input, secure macros, combat deferral, binding restoration")
+print("PASS: independent companion row, unchanged native bar, equipped slots, cooldown, own-server messages, secure macros, combat deferral, binding restoration")

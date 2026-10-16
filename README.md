@@ -1,4 +1,4 @@
-# WORLD DIGIMON MMO — Alpha 0.3.2 de laboratorio
+# WORLD DIGIMON MMO — Alpha 0.3.3 de laboratorio
 
 Un Tamer dirige un Lobo digital que combate, gana experiencia propia y conserva
 su colección. El humano no inflige daño. Módulo `mod-digimon-tamer` para
@@ -17,7 +17,7 @@ certificación para abrir un servidor público.
 - Entrenador con compras transaccionales, técnicas aprendidas y equipadas separadas.
 - Dos técnicas Rookie: Mordisco Digital y Aullido de Guerra. Etapas superiores bloqueadas.
 - Dispositivo y alternativa `.digimon`, colección persistente, captura autorizada y cambio de activo.
-- Modo Luchar con órdenes y técnicas en la barra principal mediante el complemento WorldDigimon.
+- Modo Luchar con órdenes y técnicas en una fila propia sobre las barras inferiores mediante WorldDigimon.
 - Un compañero operativo; catálogo futuro de oso, felino y rapaz desactivado.
 - Tablas de equipo, requisitos de evolución desactivados y desbloqueos por nivel.
 - Experimento de tres seguidores temporales, reservado a administradores y desactivado por defecto.

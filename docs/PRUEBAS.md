@@ -1,11 +1,28 @@
 # Validación — 16/10/2026
 
+## Fila propia de compañero 0.3.3
+
+El vídeo del usuario del 16/10/2026 confirma la carga de un modelo experimental
+privado con texturas, participación en combate y progresión del compañero al
+nivel 4. No certifica todas las animaciones ni convierte esos recursos en material
+redistribuible. El vídeo también demuestra que la superposición 0.3.2 seguía sin
+resolver la barra. Se registra ese resultado como fallo visual, aunque la
+simulación Lua anterior hubiera aprobado.
+
+La barra se mueve a una fila propia sobre las barras inferiores. Los doce botones
+se anclan al panel nuevo, y se retira la ocultación de botones originales. La
+prueba Lua comprueba ubicación independiente, controles dentro del panel sin
+solapamiento, transparencia original conservada, órdenes y aplazamiento durante
+combate. Aprobada en Lua 5.1. La corrección necesita nueva supervisión dentro del cliente gráfico.
+No cambia C++, SQL ni modelos; no requiere reiniciar el servidor.
+
 ## Corrección de visibilidad 0.3.2
 
-La prueba Lua 5.1 de la barra comprueba capas explícitas de botones y recuperación,
+La prueba Lua 5.1 de esa revisión comprobaba capas explícitas de botones y recuperación,
 ocultación de los doce botones originales y restauración de su transparencia
-individual al salir. Conserva las comprobaciones de órdenes y cambios pendientes
-durante combate. Aprobada; el cliente gráfico debe confirmar el resultado visual.
+individual al salir. Conservaba las comprobaciones de órdenes y cambios pendientes
+durante combate. Aprobó en simulación; el vídeo posterior mostró que no resolvía
+el problema visual. Se sustituye por la fila propia de 0.3.3.
 
 Se repitieron dos escenarios de protocolo: selección única y reconexión con
 guerrero/mago simultáneos; compras, equipo, daño de Mordisco, aura de Aullido,
@@ -152,8 +169,9 @@ requiere revisar sus marcadores de reaparición y ciclo de captura.
 Los registros completos y las identidades quedan en el laboratorio privado,
 en `08_registros/alpha03_*.log`. Los resultados visuales, botín/reputación en grupo,
 todas las clases, instancias, latencia, carga y desconexiones abruptas siguen el
-protocolo manual. No se ha ejecutado un cliente gráfico ni validado un modelo 3D
-Digimon. El informe no sustituye esas pruebas.
+protocolo manual. Esas baterías no ejecutan un cliente gráfico. La evidencia
+posterior aportada por el usuario para un modelo privado se describe en 0.3.3;
+el informe no sustituye las comprobaciones gráficas pendientes.
 
 ## Auditoría posterior del ZIP Alpha 0.2
 

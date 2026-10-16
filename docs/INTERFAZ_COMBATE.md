@@ -1,4 +1,4 @@
-# Dispositivo y modo Luchar — Alpha 0.3.2
+# Dispositivo y modo Luchar — Alpha 0.3.3
 
 ## Dentro del juego
 
@@ -8,13 +8,15 @@
    También puedes abrir el objeto desde la mochila o escribir `/digimon`.
 3. Selecciona un enemigo y pulsa **Atacar**. Cuando el compañero esté cerca,
    pulsa el icono de la técnica que quieras ejecutar. Puedes seguir moviendo al Tamer.
-4. Para recuperar la barra anterior, abre Dispositivo y elige **Salir de Luchar**.
+4. Para cerrar la barra del compañero y recuperar las teclas normales, abre
+   Dispositivo y elige **Salir de Luchar**.
 
-La barra ocupa la posición de la barra principal y utiliza sus teclas asignadas.
-Los controles propios tienen una capa explícita por encima de la interfaz y
-ocultan visualmente los doce botones originales mientras Luchar está activo.
-Al salir se recupera la transparencia anterior de cada botón. Esta corrección
-evita que los iconos originales tapen las técnicas del compañero.
+La barra del compañero ocupa una fila independiente, centrada por encima de las
+barras inferiores de WoW, como un panel de órdenes de mascota. Los doce controles
+se anclan a ese panel. La barra principal permanece visible y no se modifica su
+transparencia. Esto sustituye la superposición de las versiones 0.3.1–0.3.2, que
+seguía fallando en el cliente del usuario.
+Mientras Luchar está activo se utilizan las teclas asignadas a la barra principal.
 Con los controles predeterminados:
 
 | Posición | Acción |
@@ -43,7 +45,7 @@ con la tasa de foco del laboratorio en 1.
 Cambiar entre las barras durante un combate queda pendiente hasta salir de él.
 Las órdenes de una barra ya activa funcionan durante el combate. Se conserva el
 modo elegido al reconectar. No se reescriben los huecos, macros ni teclas guardados
-del personaje; los controles originales vuelven al salir de Luchar.
+del personaje; las teclas originales vuelven al salir de Luchar.
 
 ## Instalación y actualización
 
@@ -78,9 +80,9 @@ objeto. La presentación del complemento da al objeto un icono y descripción pr
 - Mensajes privados de estado `WDMMO`, versión V1: estado del actor y cinco espacios
   de equipo, sin consultas SQL por segundo. El cliente solo acepta mensajes del
   propio personaje y no cambia atributos protegidos durante el combate.
-- La compra y gestión de la colección conservan los menús del servidor. La barra
-  utiliza la interfaz principal original; otros complementos que la sustituyan
-  requieren comprobar compatibilidad.
+- La compra y gestión de la colección conservan los menús del servidor. La fila
+  propia deja espacio sobre las barras inferiores originales; otros complementos
+  que ocupen esa zona requieren comprobar compatibilidad.
 - Los iconos son referencias a recursos ya presentes en el cliente. El repositorio
   no incluye texturas, DBC, MPQ ni otros archivos del juego.
 
