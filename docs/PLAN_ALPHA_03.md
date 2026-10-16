@@ -9,10 +9,11 @@ desde otras máquinas; requiere revisar cuentas, red y configuración del reino.
 
 ## 2. Incorporar el material original
 
-Recibir el ZIP Alpha 0.2, inventariarlo sin ejecutar su contenido y comparar
-README, TASK_FOR_CODEX, código, SQL y configuración con esta implementación.
-No sustituir bases ni archivos propios por los del ZIP sin revisar diferencias.
-Recibir también el kit de modelos; registrar procedencia, hashes y permisos.
+La recepción, inventario y comparación del ZIP Alpha 0.2 están completados:
+[auditoría](AUDITORIA_ALPHA_02.md). Se conserva 0.3 y el original queda como referencia
+privada; no existen tablas antiguas que convertir en el laboratorio inspeccionado.
+Si se recibe una base antigua, preparar una conversión explícita sin sobrescribir datos.
+Recibir el kit de modelos; registrar procedencia, hashes y permisos.
 
 ## 3. Primer modelo propio o autorizado
 

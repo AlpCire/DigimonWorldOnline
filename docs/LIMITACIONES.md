@@ -40,8 +40,9 @@
 - El ensayo de seguidores no demuestra que WoW admita tres mascotas nativas:
   son invocaciones pasivas durante 30 segundos, sin control de combate, progreso
   ni escritura en colección. Solo un administrador puede activarlo y se entrega apagado.
-- Siguen pendientes los ZIP originales Alpha 0.2 y preparación de modelos.
-  No hay comparación de código con Alpha 0.2 ni recursos Digimon certificados.
+- Alpha 0.2 ya se ha auditado y comparado; no se ha instalado su módulo ni se
+  ha certificado dentro del juego. Sigue pendiente el kit de preparación de
+  modelos y no hay recursos Digimon de terceros certificados.
 
 Antes de actualizar: copia de seguridad, pruebas sobre una copia de las bases,
 revisión de colisiones de IDs y verificación de los cambios propuestos. El módulo

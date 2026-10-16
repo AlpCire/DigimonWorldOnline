@@ -102,6 +102,16 @@ todas las clases, instancias, latencia, carga y desconexiones abruptas siguen el
 protocolo manual. No se ha ejecutado un cliente gráfico ni validado un modelo 3D
 Digimon. El informe no sustituye esas pruebas.
 
+## Auditoría posterior del ZIP Alpha 0.2
+
+Se revisaron sus doce archivos y hashes. El C++ original supera sintaxis y
+compilación a objeto con el núcleo fijado, con un aviso de parámetro sin usar;
+no se enlazó ni ejecutó un servidor 0.2. Un EXPLAIN en un esquema desechable
+confirma error 1054 por `modelid1`; el INSERT original no se ejecutó. Sus
+comprobadores de estilo C++ y SQL fallan. Véase [auditoría](AUDITORIA_ALPHA_02.md).
+Esta actualización solo cambia documentación de 0.3: conserva la evidencia de
+las pruebas funcionales anteriores y no añade supuestas pruebas del cliente.
+
 ## Estilo
 
 El comprobador C++ del núcleo pasa. El comprobador SQL pasa formato, comillas,

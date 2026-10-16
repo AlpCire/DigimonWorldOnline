@@ -43,5 +43,6 @@ Código nuevo bajo GPL-2.0-or-later; pruebas con AzerothGhost MIT. No se incluye
 cliente, mapas, DBC, modelos, texturas, bases de cuentas ni contraseñas.
 El lobo utiliza referencias a recursos de la instalación local de WoW.
 No se ha certificado ningún modelo Digimon de terceros.
-El ZIP Alpha 0.2 y el kit de modelos originales siguen pendientes de recepción;
-esta entrega no afirma haberlos auditado. Véase [permisos](docs/PERMISOS_RECURSOS.md).
+El ZIP Alpha 0.2 ya se ha inventariado y comparado:
+[auditoría y diferencias](docs/AUDITORIA_ALPHA_02.md). El kit de modelos original
+sigue pendiente. Véase [permisos](docs/PERMISOS_RECURSOS.md).

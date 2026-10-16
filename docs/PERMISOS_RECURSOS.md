@@ -22,9 +22,12 @@ los juegos ni puede concederlos: consultar sus condiciones y ayuda antes de
 usar contenido. No se ha acreditado permiso del titular ni descargado ese modelo
 para este módulo.
 
-El kit `WORLD_DIGIMON_MMO_Kit_Modelos_WoW_335a.zip` y el ZIP Alpha 0.2 no estaban
-disponibles en los archivos examinados. No se ha auditado su contenido. Ningún
-Digimon procedente de terceros está certificado para el cliente 3.3.5a.
+El ZIP `WORLD_DIGIMON_MMO_Alpha_0_2.zip` se recibió y auditó el 16/10/2026:
+[informe](AUDITORIA_ALPHA_02.md). Contiene código y documentación, sin modelos,
+texturas ni un archivo LICENSE. Se conserva privado y no se atribuye una licencia
+al material recibido; no se han copiado bloques de su código al repositorio.
+El kit `WORLD_DIGIMON_MMO_Kit_Modelos_WoW_335a.zip` sigue ausente. Ningún Digimon
+procedente de terceros está certificado para el cliente 3.3.5a.
 
 Antes de añadir una criatura propia: registrar autor y titular, origen, licencia
 exacta, permiso de modificación y distribución, hashes de los archivos, revisión
