@@ -1,0 +1,8 @@
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential clang cmake ninja-build ccache git ca-certificates curl \
+    libboost-all-dev libmysqlclient-dev libssl-dev zlib1g-dev libbz2-dev \
+    libreadline-dev libncurses-dev liblzma-dev python3 python3-pymysql \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /build

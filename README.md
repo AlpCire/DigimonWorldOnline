@@ -1,5 +1,58 @@
-# WORLD DIGIMON MMO
+# WORLD DIGIMON MMO — Alpha 0.4.0 de laboratorio
 
-Laboratorio para AzerothCore y WoW 3.3.5a. El módulo Tamer se desarrolla en una rama independiente y se propone mediante Pull Request.
+Un Tamer dirige un Lobo digital que combate, gana experiencia propia y conserva
+su colección. El humano no inflige daño. Módulo `mod-digimon-tamer` para
+AzerothCore y cliente WoW **3.3.5a, build 12340**.
 
-Este repositorio no incluye cliente, mapas, DBC, modelos, texturas ni credenciales de terceros. La validación visual y los permisos de recursos se documentan por separado.
+El servidor se ha compilado y ejecutado con cuentas de prueba conectadas por el
+protocolo real del juego. La validación visual con dos clientes sigue pendiente.
+Esta entrega se propone mediante una rama y una revisión; todavía no es una
+certificación para abrir un servidor público.
+
+## Incluido
+
+- Guía de bienvenida, selección única, invocación, retirada, seguimiento y órdenes.
+- Filtros de daño del Tamer y hechizos ofensivos; XP humana x0,70 una sola vez.
+- XP y nivel del compañero independientes del dueño; DigiBits por derrotas válidas.
+- Entrenador con compras transaccionales, técnicas aprendidas y equipadas separadas.
+- Dos técnicas Rookie: Mordisco Digital y Aullido de Guerra. Etapas superiores bloqueadas.
+- Dispositivo y alternativa `.digimon`, colección persistente, captura autorizada y cambio de activo.
+- Modo Luchar con órdenes y técnicas en una fila propia sobre las barras inferiores mediante WorldDigimon.
+- Un compañero operativo; catálogo futuro de oso, felino y rapaz desactivado.
+- Evolución automática por especie y nivel; catálogo de ejemplo deshabilitado hasta instalar modelos.
+- Experimento de tres seguidores temporales, reservado a administradores y desactivado por defecto.
+
+El control de combate utiliza la barra del complemento; Gossip conserva el
+entrenamiento y la colección. El compañero es una criatura invocada con IA propia;
+no depende de la mascota nativa del cazador ni de su barra de mascota.
+La Alpha permite descansar y recuperar salud gratis fuera de combate.
+
+Para instalar el complemento y utilizar los controles, leer [Dispositivo y Luchar](docs/INTERFAZ_COMBATE.md).
+
+## Empezar
+
+1. Leer [instalación](docs/INSTALACION.md) y trabajar sobre bases de ensayo.
+2. Usar AzerothCore `01339ccfab9cd5d3d28546f79f38ad74d394b148`.
+3. Compilar, aplicar el instalador con el mundo detenido y arrancar el binario propio.
+4. Con una cuenta normal, crear un humano y hablar con el guía de Northshire.
+5. Elegir Lobo digital, abrir el dispositivo, seleccionar un enemigo y ordenar atacar.
+
+Administración: `.listadigi`, `.spawndigi Nombre [nivel]`, `.spawndigi borrar` y
+`.digilevel 22`. Catálogo CSV, técnicas por especie y evolución por nivel conservando
+el progreso: [guía de administración](docs/ADMINISTRACION_CATALOGO.md).
+Patamon → Angemon a nivel 22 queda como ejemplo deshabilitado hasta instalar modelos.
+
+Consultar [arquitectura](docs/ARQUITECTURA.md), [pruebas ejecutadas](docs/PRUEBAS.md),
+[protocolo dentro del cliente](docs/PRUEBAS_MANUALES.md),
+[limitaciones](docs/LIMITACIONES.md) y [siguiente desarrollo](docs/PLAN_ALPHA_03.md).
+
+## Procedencia
+
+Código nuevo bajo GPL-2.0-or-later; pruebas con AzerothGhost MIT. No se incluyen
+cliente, mapas, DBC, modelos, texturas, bases de cuentas ni contraseñas.
+El lobo utiliza referencias a recursos de la instalación local de WoW.
+Existe una prueba gráfica privada satisfactoria de un modelo externo; no se
+distribuye y no acredita compatibilidad exhaustiva ni permiso de redistribución.
+El ZIP Alpha 0.2 ya se ha inventariado y comparado:
+[auditoría y diferencias](docs/AUDITORIA_ALPHA_02.md). El kit de modelos original
+sigue pendiente. Véase [permisos](docs/PERMISOS_RECURSOS.md).

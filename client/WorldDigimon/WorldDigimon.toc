@@ -1,0 +1,7 @@
+## Interface: 30300
+## Title: World Digimon
+## Notes: Dispositivo y barra de combate del Tamer
+## Author: WORLD DIGIMON MMO
+## Version: 0.4.0
+## SavedVariablesPerCharacter: WorldDigimonDB
+WorldDigimon.lua
