@@ -63,6 +63,11 @@ struct Progress
     uint64_t Experience;
 };
 
+inline bool EvolutionReady(uint8_t level, uint8_t required, Stage source, Stage target)
+{
+    return required >= 2 && required <= 80 && level >= required && target > source && target <= Stage::Mega;
+}
+
 inline Progress GainExperience(Progress progress, uint32_t amount, uint8_t maxLevel = 80)
 {
     progress.Experience = amount > std::numeric_limits<uint64_t>::max() - progress.Experience

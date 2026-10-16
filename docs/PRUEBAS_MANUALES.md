@@ -50,7 +50,8 @@ no una declaración de pruebas superadas.
     llenas, dispositivo en banco, menús cancelados y elección de otro objetivo
     mientras el menú está abierto. Comprobar que no se activa la piedra de hogar.
 17. Verificar límites: solo Lobo digital seleccionable, dos técnicas Rookie y un
-    compañero operativo. No hay evoluciones, pociones ni segundo combatiente
+    compañero operativo. Las evoluciones por nivel requieren reglas y modelos
+    habilitados; no hay pociones ni segundo combatiente
     disponibles. Los espacios futuros se muestran como planificación.
 18. Verificar una misión que entrega una cantidad conocida de XP. Comparar la
     recompensa humana con x0,70 y comprobar que el progreso del compañero no

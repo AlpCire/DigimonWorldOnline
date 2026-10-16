@@ -39,6 +39,11 @@ enum Statement : uint32
     ClaimCapturedWild,
     SelectUnlocks,
     SetTeamLead,
+    SelectAliases,
+    SelectSpeciesTechniques,
+    SelectEvolutions,
+    PruneEquipment,
+    AuditLevel,
     CountStatements
 };
 

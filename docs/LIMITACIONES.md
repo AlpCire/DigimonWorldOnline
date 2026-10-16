@@ -12,10 +12,11 @@
   inicial de 30. Los desbloqueos de nivel son planificación configurable,
   no acceso a dos o tres combatientes en esta Alpha.
 - Oso, felino y rapaz están catalogados y tienen plantillas locales verificadas,
-  pero no se ofrecen como iniciales ni capturas. Evoluciones y DigiPociones no
-  están implementadas como mecánicas jugables. Las técnicas superiores están desactivadas.
-- Las técnicas dependen de etapa, moneda y entrenador; aún no hay especialización
-  por especie, árbol de requisitos ni balance definitivo. La curva del compañero
+  pero no se ofrecen como iniciales ni capturas. El motor de evolución por especie
+  y nivel está implementado; el ejemplo Patamon/Angemon sigue desactivado hasta
+  instalar sus modelos. DigiPociones y técnicas superiores siguen desactivadas.
+- Las técnicas dependen de especie, etapa, moneda y entrenador; no hay árbol de
+  requisitos ni balance definitivo. La curva del compañero
   es propia: `100 + 75 × nivel`, máximo 80; no reproduce la curva de WoW.
 - Descansar recupera gratis al compañero fuera de combate. Es una ayuda de ensayo,
   pendiente de sustituir por las mecánicas de cuidados y costes del diseño.

@@ -60,6 +60,17 @@ try:
         cursor.execute("INSERT INTO digimon_collection (owner_guid,species_id,capture_key) VALUES (1,1,'unique-life')")
         reject(cursor, "INSERT INTO digimon_collection (owner_guid,species_id,capture_key) VALUES (2,1,'unique-life')", {1062})
         reject(cursor, 'INSERT INTO digimon_equipped VALUES (101,0,1)', {1452})
+        reject(cursor, 'INSERT INTO digimon_evolution_rules VALUES (1,1,22,1)', {3819})
+        reject(cursor, 'INSERT INTO digimon_evolution_rules VALUES (1,101,0,1)', {3819})
+        reject(cursor, "INSERT INTO digimon_aliases VALUES ('missing',999999)", {1452})
+        reject(cursor, 'INSERT INTO digimon_species_techniques VALUES (1,999999)', {1452})
+        cursor.execute("SELECT target_species,required_level,enabled FROM digimon_evolution_rules WHERE source_species=101")
+        assert cursor.fetchone() == (102, 22, 0)
+        checks += 1
+        cursor.execute("INSERT INTO digimon_techniques VALUES (101,'Nombre Digital',17253,1,20,1,0)")
+        cursor.execute('SELECT COUNT(*) FROM digimon_techniques WHERE spell_id=17253')
+        assert cursor.fetchone()[0] == 2
+        checks += 1
         cursor.execute('SELECT COUNT(*) FROM digimon_schema_version')
         assert cursor.fetchone()[0] == len(migrations)
         checks += 1

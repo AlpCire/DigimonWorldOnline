@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {900100: 'DigimonWelcome', 900101: 'DigimonWelcome',
             900102: 'DigimonCompanionAI', 900103: 'DigimonWildAI',
             900104: 'DigimonCompanionAI', 900105: 'DigimonCompanionAI',
-            900106: 'DigimonCompanionAI', 900120: 'DigimonLabFollowerAI'}
+            900106: 'DigimonCompanionAI', 900120: 'DigimonLabFollowerAI', 900121: 'DigimonPreviewAI'}
 
 
 def identifier(value):
@@ -96,6 +96,8 @@ def apply_world(cursor):
                        maxlevel=1, RegenHealth=0, ExperienceModifier=0, BaseAttackTime=1500)
     clone_template(cursor, 69, 900120, 'Seguidor de ensayo', 'DigimonLabFollowerAI', faction=35,
                    minlevel=1, maxlevel=1, RegenHealth=0, ExperienceModifier=0, unit_flags=2)
+    clone_template(cursor, 69, 900121, 'Digimon de prueba temporal', 'DigimonPreviewAI', faction=14,
+                   minlevel=1, maxlevel=1, RegenHealth=0, ExperienceModifier=0)
     cursor.execute('SELECT * FROM item_template WHERE entry=6948')
     item = cursor.fetchone()
     item.update(entry=900110, name='Dispositivo Sagrado', description='Dirige y consulta tu colección digital.',

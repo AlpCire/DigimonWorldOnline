@@ -93,7 +93,8 @@ CREATE TABLE IF NOT EXISTS `digimon_unlocks` (
     `potion_tier` TINYINT UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT IGNORE INTO `digimon_species` VALUES (1, 900102, 'Lobo digital', 1, 900103);
+INSERT IGNORE INTO `digimon_species` (`id`, `creature_entry`, `name`, `starter_enabled`, `capture_entry`)
+    VALUES (1, 900102, 'Lobo digital', 1, 900103);
 INSERT IGNORE INTO `digimon_techniques` VALUES
     (1, 'Mordisco Digital', 17253, 1, 20, 1, 0),
     (2, 'Aullido de Guerra', 24604, 1, 35, 1, 0),

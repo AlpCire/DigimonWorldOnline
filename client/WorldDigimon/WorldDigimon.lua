@@ -36,6 +36,7 @@ local receivedAt = 0
 local lastRequest = -100
 local updateElapsed = 0
 local names = {[17253] = "Mordisco Digital", [24604] = "Aullido de Guerra"}
+local techniqueNames = {}
 local actions = {
     {"Atacar", "attack", "Ability_Hunter_Pet_Attack"},
     {"Seguir", "follow", "Ability_Hunter_Pet_Follow"},
@@ -156,7 +157,7 @@ local function refresh()
         local slot = state.slots[i]
         if slot and slot.spell > 0 then
             local name, _, icon = GetSpellInfo(slot.spell)
-            button.label = names[slot.spell] or name or ("Técnica " .. i)
+            button.label = techniqueNames[slot.technique] or names[slot.spell] or name or ("Técnica " .. i)
             button.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
             local ready = not stale and state.hp > 0 and state.focus >= slot.cost
             local brightness = ready and 1 or 0.35
@@ -258,15 +259,23 @@ addon:SetScript("OnEvent", function(_, event, prefix, message, channel, sender)
             end
             local slots = {}
             for i = 1, 5 do
-                local spell, cost, remaining = strsplit(",", fields[i + 8])
+                local spell, cost, remaining, technique = strsplit(",", fields[i + 8])
                 spell, cost, remaining = tonumber(spell), tonumber(cost), tonumber(remaining)
                 if not spell or not cost or not remaining or spell < 0 or cost < 0 or remaining < 0 then return end
-                slots[i] = {spell = spell, cost = cost, remaining = remaining}
+                technique = tonumber(technique) or 0 -- Compatible with the original three-field snapshot.
+                if technique < 0 or technique % 1 ~= 0 then return end
+                slots[i] = {spell = spell, cost = cost, remaining = remaining, technique = technique}
             end
             state = {active = numbers[3], level = numbers[4], hp = numbers[5], maxhp = numbers[6],
                 focus = numbers[7], maxfocus = numbers[8], slots = slots}
             receivedAt = GetTime()
             refresh()
+        elseif fields[2] == "T" and #fields == 4 then
+            local id = tonumber(fields[3])
+            if id and id > 0 and id % 1 == 0 and #fields[4] > 0 and #fields[4] <= 160 then
+                techniqueNames[id] = fields[4]
+                refresh()
+            end
         elseif fields[2] == "FIGHT" then
             setFight(true)
         elseif fields[2] == "MENU" then

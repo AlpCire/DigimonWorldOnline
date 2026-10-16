@@ -33,6 +33,7 @@
 #include "WorldPacket.h"
 #include <memory>
 #include <charconv>
+#include <cctype>
 #include <map>
 #include <mutex>
 #include <string_view>
@@ -90,6 +91,8 @@ struct Species
     std::string Name;
     bool Starter;
     uint32 CaptureEntry;
+    Stage DefaultStage;
+    bool Enabled;
 };
 
 struct Companion
@@ -125,6 +128,7 @@ struct Tamer
     uint32 NextOption = 1;
     ObjectGuid Actor;
     std::vector<Companion> Companions;
+    std::unordered_set<uint32> SentTechniqueNames;
 };
 
 std::recursive_mutex Mutex;
@@ -132,6 +136,16 @@ std::unique_ptr<MySQLConnectionInfo> DatabaseInfo;
 std::unique_ptr<Connection> Database;
 std::unordered_map<uint32, Species> Catalog;
 std::unordered_map<uint32, Technique> TechniqueCatalog;
+std::unordered_map<std::string, uint32> Aliases;
+std::unordered_map<uint32, std::unordered_set<uint32>> SpeciesTechniques;
+struct Evolution
+{
+    uint32 Target;
+    uint8 Level;
+};
+std::unordered_map<uint32, Evolution> Evolutions;
+std::unordered_map<uint32, std::vector<ObjectGuid>> PreviewActors;
+constexpr uint32 PreviewEntry = 900121;
 std::unordered_map<uint32, Tamer> Tamers;
 struct WildState
 {
@@ -185,6 +199,55 @@ template <class... Args> bool Execute(Statement index, Args const&... args)
 }
 
 void SendUI(Player* player, std::string const& message);
+
+bool TechniqueAllowed(uint32 species, uint32 technique)
+{
+    auto const found = SpeciesTechniques.find(species);
+    return found != SpeciesTechniques.end() && found->second.count(technique);
+}
+
+std::string CatalogKey(std::string_view text)
+{
+    std::string result;
+    for (unsigned char value : text)
+        if (!std::isspace(value))
+            result += static_cast<char>(std::tolower(value));
+    return result;
+}
+
+uint32 ResolveSpecies(std::string_view text)
+{
+    uint32 id = 0;
+    auto const parsed = std::from_chars(text.data(), text.data() + text.size(), id);
+    if (parsed.ec == std::errc() && parsed.ptr == text.data() + text.size() && Catalog.count(id))
+        return id;
+    std::string const key = CatalogKey(text);
+    if (auto alias = Aliases.find(key); alias != Aliases.end())
+        return alias->second;
+    for (auto const& [speciesId, species] : Catalog)
+        if (CatalogKey(species.Name) == key)
+            return speciesId;
+    return 0;
+}
+
+std::pair<uint32, Stage> ResolveEvolution(Companion const& companion, uint8 level)
+{
+    uint32 species = companion.SpeciesId;
+    Stage stage = companion.Evolution;
+    for (uint8 step = 0; step < 4; ++step)
+    {
+        auto const rule = Evolutions.find(species);
+        if (rule == Evolutions.end())
+            break;
+        auto const target = Catalog.find(rule->second.Target);
+        if (target == Catalog.end() || !target->second.Enabled ||
+            !EvolutionReady(level, rule->second.Level, stage, target->second.DefaultStage))
+            break;
+        species = target->first;
+        stage = target->second.DefaultStage;
+    }
+    return {species, stage};
+}
 
 void Notify(Player* player, std::string const& message)
 {
@@ -303,6 +366,7 @@ void SendCombatState(Player* player, Tamer& state)
                 if (auto technique = TechniqueCatalog.find(equipped->second);
                     technique != TechniqueCatalog.end() && technique->second.Enabled &&
                     companion->Learned.count(equipped->second) &&
+                    TechniqueAllowed(companion->SpeciesId, equipped->second) &&
                     companion->Evolution >= technique->second.Required &&
                     CanEquip(companion->Evolution, slot, technique->second.Special))
                 {
@@ -310,8 +374,12 @@ void SendCombatState(Player* player, Tamer& state)
                     cooldown = actor ? actor->GetSpellCooldown(spellId) : 0;
                     if (SpellInfo const* spell = sSpellMgr->GetSpellInfo(spellId))
                         cost = actor ? spell->CalcPowerCost(actor, spell->GetSchoolMask()) : spell->ManaCost;
+                    if (state.SentTechniqueNames.insert(equipped->second).second)
+                        SendUI(player, "T|" + std::to_string(equipped->second) + "|" + technique->second.Name);
                 }
         message += "|" + std::to_string(spellId) + "," + std::to_string(cost) + "," + std::to_string(cooldown);
+        message += "," + std::to_string(companion && companion->Equipped.count(slot) ?
+                                            companion->Equipped.at(slot) : 0);
     }
     SendUI(player, message);
 }
@@ -368,6 +436,24 @@ void ApplyStats(Creature* actor, Companion const& companion)
     actor->SetPower(POWER_FOCUS, 100);
 }
 
+bool ApplyForm(Player* player, Creature* actor, Companion const& companion)
+{
+    Species const& species = Catalog.at(companion.SpeciesId);
+    uint32 const focus = actor->GetPower(POWER_FOCUS);
+    if (actor->GetEntry() != species.Entry && !actor->UpdateEntry(species.Entry, nullptr, false, false))
+        return false;
+    actor->SetOwnerGUID(player->GetGUID());
+    actor->SetCreatorGUID(player->GetGUID());
+    actor->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
+    actor->SetFaction(player->GetFaction());
+    actor->SetName(species.Name);
+    actor->SetReactState(REACT_PASSIVE);
+    actor->SetNoCallAssistance(true);
+    ApplyStats(actor, companion);
+    actor->SetPower(POWER_FOCUS, focus);
+    return true;
+}
+
 void RewardCompanion(Creature* actor, Unit* victim)
 {
     std::lock_guard<std::recursive_mutex> guard(Mutex);
@@ -391,9 +477,15 @@ void RewardCompanion(Creature* actor, Unit* victim)
     uint32 const amount = ScaleXP(base, modifier);
     Progress const progress = GainExperience({companion->Level, companion->Experience}, amount);
     bool const levelled = progress.Level > companion->Level;
+    auto const form = levelled ? ResolveEvolution(*companion, progress.Level) :
+                                std::make_pair(companion->SpeciesId, companion->Evolution);
+    bool const evolved = form.first != companion->SpeciesId;
     auto transaction = std::make_shared<Transaction<Connection>>();
     transaction->Append(
-        Make(SaveProgress, progress.Level, progress.Experience, actor->GetHealthPct(), OwnerId(player), companion->Id));
+        Make(SaveProgress, progress.Level, progress.Experience, actor->GetHealthPct(), form.first, uint8(form.second),
+             OwnerId(player), companion->Id));
+    if (evolved)
+        transaction->Append(Make(PruneEquipment, OwnerId(player), companion->Id));
     transaction->Append(Make(RewardBits, Config.BitsPerKill, OwnerId(player), Config.BitsPerKill));
     if (Database->ExecuteTransaction(transaction) != 0 || !Reload(player))
     {
@@ -404,8 +496,12 @@ void RewardCompanion(Creature* actor, Unit* victim)
     if (levelled)
         if (Companion* updated = Active(Tamers.at(OwnerId(player))))
         {
-            ApplyStats(actor, *updated);
+            if (!ApplyForm(player, actor, *updated))
+                LOG_ERROR("module.digimon", "Cannot apply evolved actor for owner {}", OwnerId(player));
             Notify(player, "Tu compañero ha alcanzado el nivel " + std::to_string(updated->Level) + ".");
+            if (evolved)
+                Notify(player, "¡Digievolución! Tu compañero ahora es " + Catalog.at(updated->SpeciesId).Name + ".");
+            SendCombatState(player, Tamers.at(OwnerId(player)));
         }
 }
 
@@ -426,7 +522,7 @@ bool Summon(Player* player, Tamer& state)
     if (Actor(player, state))
         return true;
     auto const species = Catalog.find(companion->SpeciesId);
-    if (species == Catalog.end())
+    if (species == Catalog.end() || !species->second.Enabled)
         return false;
     Position const position = player->GetNearPosition(2.0f, 0.8f);
     TempSummon* actor = player->SummonCreature(species->second.Entry, position);
@@ -474,7 +570,8 @@ bool IsEquipped(Companion const& companion, uint32 id)
 {
     auto const technique = TechniqueCatalog.find(id);
     if (technique == TechniqueCatalog.end() || !technique->second.Enabled ||
-        companion.Evolution < technique->second.Required || !companion.Learned.count(id))
+        companion.Evolution < technique->second.Required || !companion.Learned.count(id) ||
+        !TechniqueAllowed(companion.SpeciesId, id))
         return false;
     for (auto const& [slot, equipped] : companion.Equipped)
         if (equipped == id && CanEquip(companion.Evolution, slot, technique->second.Special))
@@ -488,7 +585,8 @@ void TechniquesMenu(Player* player, ObjectGuid source, Companion const& companio
     player->PlayerTalkClass->GetGossipMenu().SetMenuId(DeviceMenu);
     for (uint32 id : companion.Learned)
         if (auto technique = TechniqueCatalog.find(id);
-            technique != TechniqueCatalog.end() && technique->second.Enabled)
+            technique != TechniqueCatalog.end() && technique->second.Enabled &&
+            TechniqueAllowed(companion.SpeciesId, id))
             AddOption(player, GOSSIP_ICON_CHAT,
                       (IsEquipped(companion, id) ? "Retirar técnica: " : "Equipar técnica: ") + technique->second.Name,
                       IsEquipped(companion, id) ? Unequip : Equip, id);
@@ -504,7 +602,7 @@ void LearnTechnique(Player* player, ObjectGuid source, Tamer& state, uint32 id)
         return;
     Technique const& technique = found->second;
     if (!technique.Enabled || companion->Evolution < technique.Required || companion->Learned.count(id) ||
-        state.Bits < technique.Price)
+        state.Bits < technique.Price || !TechniqueAllowed(companion->SpeciesId, id))
     {
         Notify(player, "No cumples los requisitos, ya conoces la técnica o faltan DigiBits.");
         return;
@@ -537,7 +635,8 @@ void SetTechnique(Player* player, Tamer& state, uint32 id, bool remove)
         return;
     }
     Technique const& technique = found->second;
-    if (!technique.Enabled || companion->Evolution < technique.Required || IsEquipped(*companion, id))
+    if (!technique.Enabled || companion->Evolution < technique.Required || IsEquipped(*companion, id) ||
+        !TechniqueAllowed(companion->SpeciesId, id))
         return;
     for (uint8 slot = 0; slot <= 4; ++slot)
         if (CanEquip(companion->Evolution, slot, technique.Special) && !companion->Equipped.count(slot))
@@ -752,7 +851,7 @@ void Menu(Player* player, ObjectGuid source, bool welcome)
     player->PlayerTalkClass->GetGossipMenu().SetMenuId(DeviceMenu);
     if (!state.Active && welcome)
         for (auto const& [id, species] : Catalog)
-            if (species.Starter)
+            if (species.Starter && species.Enabled)
                 AddOption(player, GOSSIP_ICON_CHAT, "Elegir " + species.Name, ChooseStarter, id);
     if (state.Active)
     {
@@ -769,7 +868,8 @@ void Menu(Player* player, ObjectGuid source, bool welcome)
             {
                 if (IsEquipped(*companion, id))
                     AddOption(player, GOSSIP_ICON_CHAT, "Usar: " + technique.Name, Use, id);
-                if (AtTrainer(player, source) && technique.Enabled && companion->Evolution >= technique.Required &&
+                if (AtTrainer(player, source) && technique.Enabled && TechniqueAllowed(companion->SpeciesId, id) &&
+                    companion->Evolution >= technique.Required &&
                     !companion->Learned.count(id))
                     AddOption(player, GOSSIP_ICON_TRAINER,
                               "Aprender " + technique.Name + " (" + std::to_string(technique.Price) + " DigiBits)", Buy,
@@ -804,7 +904,7 @@ void Select(Player* player, ObjectGuid source, bool welcome, uint32 sender, uint
     else if (sender == ChooseStarter)
     {
         if (!welcome || Busy(player, state) || state.Active || Query(SelectStarter, owner) || !Catalog.count(action) ||
-            !Catalog.at(action).Starter)
+            !Catalog.at(action).Starter || !Catalog.at(action).Enabled)
             return;
         auto transaction = std::make_shared<Transaction<Connection>>();
         transaction->Append(Make(InsertStarter, owner, owner, action));
@@ -954,7 +1054,9 @@ public:
             {
                 Field* fields = rows->Fetch();
                 Catalog.emplace(fields[0].Get<uint32>(), Species{fields[1].Get<uint32>(), fields[2].Get<std::string>(),
-                                                                 fields[3].Get<uint8>() != 0, fields[4].Get<uint32>()});
+                                                                 fields[3].Get<uint8>() != 0, fields[4].Get<uint32>(),
+                                                                 static_cast<Stage>(fields[5].Get<uint8>()),
+                                                                 fields[6].Get<uint8>() != 0});
             } while (rows->NextRow());
         if (auto rows = Query(SelectTechniques))
             do
@@ -972,6 +1074,24 @@ public:
                 Unlocks.emplace(fields[0].Get<uint8>(),
                                 Unlock{fields[1].Get<uint8>(), fields[2].Get<uint8>(), fields[3].Get<uint8>()});
             } while (rows->NextRow());
+        if (auto rows = Query(SelectAliases))
+            do
+            {
+                Field* fields = rows->Fetch();
+                Aliases.emplace(CatalogKey(fields[0].Get<std::string>()), fields[1].Get<uint32>());
+            } while (rows->NextRow());
+        if (auto rows = Query(SelectSpeciesTechniques))
+            do
+            {
+                Field* fields = rows->Fetch();
+                SpeciesTechniques[fields[0].Get<uint32>()].insert(fields[1].Get<uint32>());
+            } while (rows->NextRow());
+        if (auto rows = Query(SelectEvolutions))
+            do
+            {
+                Field* fields = rows->Fetch();
+                Evolutions.emplace(fields[0].Get<uint32>(), Evolution{fields[1].Get<uint32>(), fields[2].Get<uint8>()});
+            } while (rows->NextRow());
         return !Catalog.empty();
     }
 
@@ -988,6 +1108,10 @@ public:
         Tamers.clear();
         Catalog.clear();
         TechniqueCatalog.clear();
+        Aliases.clear();
+        SpeciesTechniques.clear();
+        Evolutions.clear();
+        PreviewActors.clear();
         Wild.clear();
         ProtectedQuestEntries.clear();
         Unlocks.clear();
@@ -1006,7 +1130,9 @@ public:
         if (!Config.Enabled)
             return;
         for (auto const& [id, species] : Catalog)
-            if (!sObjectMgr->GetCreatureTemplate(species.Entry))
+            if (species.Enabled && (!sObjectMgr->GetCreatureTemplate(species.Entry) ||
+                sObjectMgr->GetCreatureTemplate(species.Entry)->ScriptID !=
+                    sObjectMgr->GetScriptId("DigimonCompanionAI")))
             {
                 LOG_ERROR("module.digimon", "Species {} references missing creature {}", id, species.Entry);
                 World::StopNow(ERROR_EXIT_CODE);
@@ -1014,6 +1140,13 @@ public:
             }
         for (auto const& [id, technique] : TechniqueCatalog)
         {
+            if (technique.Name.empty() || technique.Name.size() > 160 ||
+                technique.Name.find_first_of("|\t\r\n") != std::string::npos)
+            {
+                LOG_ERROR("module.digimon", "Invalid technique name {}", id);
+                World::StopNow(ERROR_EXIT_CODE);
+                return;
+            }
             if (technique.Enabled)
             {
                 SpellInfo const* spell = sSpellMgr->GetSpellInfo(technique.Spell);
@@ -1028,6 +1161,15 @@ public:
                          spell->SpellName[0]);
             }
         }
+        for (auto const& [source, rule] : Evolutions)
+            if (!Catalog.count(source) || !Catalog.count(rule.Target) || !Catalog.at(source).Enabled ||
+                !Catalog.at(rule.Target).Enabled || !EvolutionReady(rule.Level, rule.Level,
+                    Catalog.at(source).DefaultStage, Catalog.at(rule.Target).DefaultStage))
+            {
+                LOG_ERROR("module.digimon", "Invalid enabled evolution rule for species {}", source);
+                World::StopNow(ERROR_EXIT_CODE);
+                return;
+            }
         for (auto const& [questId, quest] : sObjectMgr->GetQuestTemplates())
             for (int32 entry : quest->RequiredNpcOrGo)
                 if (entry > 0)
@@ -1061,6 +1203,7 @@ public:
     void OnPlayerLogout(Player* player) override
     {
         std::lock_guard<std::recursive_mutex> guard(Mutex);
+        PreviewActors.erase(OwnerId(player));
         auto state = Tamers.find(OwnerId(player));
         if (state != Tamers.end())
         {
@@ -1078,6 +1221,7 @@ public:
     void OnPlayerMapChanged(Player* player) override
     {
         std::lock_guard<std::recursive_mutex> guard(Mutex);
+        PreviewActors.erase(OwnerId(player));
         auto state = Tamers.find(OwnerId(player));
         if (state != Tamers.end())
         {
@@ -1240,7 +1384,141 @@ public:
     {
         using namespace Acore::ChatCommands;
         return {{"digimon", OpenDevice, rbac::RBAC_PERM_COMMAND_HELP, Console::No},
+                {"spawndigi", SpawnPreview, rbac::RBAC_PERM_COMMAND_NPC_ADD, Console::No},
+                {"digilevel", SetCompanionLevel, rbac::RBAC_PERM_COMMAND_NPC_ADD, Console::No},
+                {"listadigi", ListCatalog, rbac::RBAC_PERM_COMMAND_NPC_ADD, Console::No},
                 {"digimonlab", MultiFollowerExperiment, rbac::RBAC_PERM_COMMAND_NPC_ADD, Console::No}};
+    }
+    static Player* Administrator(ChatHandler* handler)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+        return Config.Enabled && Database && player && player->IsInWorld() &&
+                       player->GetSession()->GetSecurity() >= SEC_ADMINISTRATOR ? player : nullptr;
+    }
+    static bool ListCatalog(ChatHandler* handler)
+    {
+        std::lock_guard<std::recursive_mutex> guard(Mutex);
+        if (!Administrator(handler))
+            return false;
+        for (auto const& [id, species] : Catalog)
+            handler->SendSysMessage(std::to_string(id) + " · " + species.Name +
+                                    (species.Enabled ? " · disponible" : " · pendiente de instalar/habilitar"));
+        for (auto const& [name, id] : Aliases)
+            handler->SendSysMessage("Alias: " + name + " → " + std::to_string(id));
+        return true;
+    }
+    static bool SpawnPreview(ChatHandler* handler, char const* args)
+    {
+        std::lock_guard<std::recursive_mutex> guard(Mutex);
+        Player* player = Administrator(handler);
+        if (!player || !player->IsAlive() || player->IsInCombat() || player->InBattleground() ||
+            player->GetVehicle() || player->IsInFlight())
+            return false;
+        auto& previews = PreviewActors[OwnerId(player)];
+        std::string name = args ? args : "";
+        if (CatalogKey(name) == "borrar")
+        {
+            for (ObjectGuid guid : previews)
+                if (Creature* actor = player->GetMap()->GetCreature(guid))
+                    actor->DespawnOrUnsummon();
+            previews.clear();
+            handler->SendSysMessage("Invocaciones de prueba retiradas.");
+            return true;
+        }
+        std::erase_if(previews, [player](ObjectGuid guid) { return !player->GetMap()->GetCreature(guid); });
+        if (previews.size() >= 5)
+        {
+            handler->SendSysMessage("Máximo cinco pruebas. Usa .spawndigi borrar.");
+            return true;
+        }
+        uint32 level = 1;
+        if (auto const space = name.find_last_of(' '); space != std::string::npos)
+        {
+            uint32 parsedLevel = 0;
+            auto const result = std::from_chars(name.data() + space + 1, name.data() + name.size(), parsedLevel);
+            if (result.ec == std::errc() && result.ptr == name.data() + name.size())
+            {
+                level = parsedLevel;
+                name.resize(space);
+            }
+        }
+        uint32 const id = ResolveSpecies(name);
+        if (!id || level < 1 || level > 80)
+        {
+            handler->SendSysMessage("Uso: .spawndigi Nombre o ID [nivel 1–80]. Consulta .listadigi.");
+            return true;
+        }
+        Species const& species = Catalog.at(id);
+        if (!species.Enabled)
+        {
+            handler->SendSysMessage("Ese Digimon está pendiente de instalar/habilitar. No se usará otro modelo.");
+            return true;
+        }
+        CreatureModel const* model = sObjectMgr->ChooseDisplayId(sObjectMgr->GetCreatureTemplate(species.Entry));
+        if (!model)
+            return false;
+        Position const position = player->GetNearPosition(4.0f, 0.0f);
+        if (TempSummon* actor = player->SummonCreature(PreviewEntry, position, TEMPSUMMON_TIMED_DESPAWN, 180000))
+        {
+            actor->SetCreatorGUID(player->GetGUID());
+            actor->SetDisplayId(model->CreatureDisplayID, model->DisplayScale);
+            actor->SetNativeDisplayId(model->CreatureDisplayID);
+            actor->SetName(species.Name + " (prueba)");
+            actor->SetReactState(REACT_PASSIVE);
+            actor->SetNoCallAssistance(true);
+            ApplyStats(actor, Companion{0, id, species.DefaultStage, uint8(level), 0, 100.0f, {}, {}});
+            previews.push_back(actor->GetGUID());
+            handler->SendSysMessage("Prueba temporal creada durante 180 segundos; sin botín, XP ni captura.");
+            LOG_INFO("module.digimon", "Admin account {} previewed species {} at level {}",
+                     player->GetSession()->GetAccountId(), id, level);
+            return true;
+        }
+        return false;
+    }
+    static bool SetCompanionLevel(ChatHandler* handler, char const* args)
+    {
+        std::lock_guard<std::recursive_mutex> guard(Mutex);
+        Player* player = Administrator(handler);
+        if (!player || (!Tamers.count(OwnerId(player)) && !Reload(player)))
+            return false;
+        std::string_view const text = args ? args : "";
+        uint32 level = 0;
+        auto const parsed = std::from_chars(text.data(), text.data() + text.size(), level);
+        if (parsed.ec != std::errc() || parsed.ptr != text.data() + text.size() || level < 1 || level > 80)
+        {
+            handler->SendSysMessage("Uso: .digilevel 1–80. Ajusta tu compañero actual; XP parcial a cero.");
+            return true;
+        }
+        Tamer& state = Tamers.at(OwnerId(player));
+        Companion* companion = Active(state);
+        Creature* actor = Actor(player, state);
+        if (!player->IsAlive() || Busy(player, state) || !companion || companion->Health <= 0 ||
+            (actor && !actor->IsAlive()))
+        {
+            handler->SendSysMessage("Necesitas un compañero vivo y estar fuera de combate.");
+            return true;
+        }
+        auto const form = level > companion->Level ? ResolveEvolution(*companion, uint8(level)) :
+                                                   std::make_pair(companion->SpeciesId, companion->Evolution);
+        float const health = actor ? actor->GetHealthPct() : companion->Health;
+        auto transaction = std::make_shared<Transaction<Connection>>();
+        transaction->Append(Make(SaveProgress, uint8(level), uint64(0), health, form.first, uint8(form.second),
+                                 OwnerId(player), companion->Id));
+        transaction->Append(Make(PruneEquipment, OwnerId(player), companion->Id));
+        transaction->Append(Make(AuditLevel, player->GetSession()->GetAccountId(), OwnerId(player), companion->Id,
+                                 companion->SpeciesId, form.first, companion->Level, uint8(level)));
+        if (Database->ExecuteTransaction(transaction) != 0 || !Reload(player))
+        {
+            handler->SendSysMessage("No se pudo guardar el nivel. Consulta el registro del servidor.");
+            return true;
+        }
+        Tamer& updated = Tamers.at(OwnerId(player));
+        if (Companion* current = Active(updated); actor && current && !ApplyForm(player, actor, *current))
+            LOG_ERROR("module.digimon", "Cannot apply admin level to actor for owner {}", OwnerId(player));
+        SendCombatState(player, updated);
+        handler->SendSysMessage("Compañero: " + Catalog.at(form.first).Name + " · nivel " + std::to_string(level) +
+                                ". Guardado; evolución aplicada si corresponde. No hay devolución automática.");
+        return true;
     }
     static bool OpenDevice(ChatHandler* handler, char const* args)
     {
@@ -1254,6 +1532,7 @@ public:
         if (command == "sync" || command == "ui")
         {
             state.Addon = true;
+            state.SentTechniqueNames.clear();
             SendCombatState(player, state);
             if (command == "ui")
                 SendUI(player, "MENU");
@@ -1326,6 +1605,18 @@ struct DigimonLabFollowerAI : ScriptedAI
     {
         Player* owner = ObjectAccessor::FindPlayer(me->GetOwnerGUID());
         if (!Config.Experiments || !owner || !owner->IsInWorld() || !owner->IsInMap(me))
+            me->DespawnOrUnsummon();
+    }
+};
+
+struct DigimonPreviewAI : ScriptedAI
+{
+    explicit DigimonPreviewAI(Creature* creature) : ScriptedAI(creature) {}
+    void AttackStart(Unit*) override {}
+    void UpdateAI(uint32) override
+    {
+        Player* creator = ObjectAccessor::FindPlayer(me->GetCreatorGUID());
+        if (!creator || !creator->IsInWorld() || !creator->IsInMap(me))
             me->DespawnOrUnsummon();
     }
 };
@@ -1477,6 +1768,7 @@ void AddDigimonTamerScripts()
     new DigimonWelcome();
     new DigimonDevice();
     new DigimonCommand();
+    RegisterCreatureAI(DigimonPreviewAI);
     RegisterCreatureAI(DigimonCompanionAI);
     RegisterCreatureAI(DigimonWildAI);
     RegisterCreatureAI(DigimonLabFollowerAI);

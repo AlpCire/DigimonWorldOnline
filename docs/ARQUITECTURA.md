@@ -101,6 +101,22 @@ actor. La lista se pagina de veinte en veinte para respetar el límite de Gossip
 La salud se restaura redondeando al HP más cercano para evitar pérdidas acumuladas
 al serializar porcentajes.
 
+## Evolución y catálogo
+
+La migración 007 añade etapa/habilitación por especie, alias, asignaciones de
+técnicas y `digimon_evolution_rules`. El motor recorre reglas habilitadas al subir
+de nivel: cada transición aumenta etapa, conserva ID/dueño/nivel/XP/salud y
+actualiza especie y etapa en la misma escritura que el progreso. La recompensa
+de moneda comparte transacción. Se desequipa lo incompatible, sin borrar el
+aprendizaje. El actor cambia de plantilla conservando propietario y control.
+
+`.digilevel` usa esas reglas fuera de combate y audita su ajuste; `.spawndigi`
+usa una plantilla separada sin recompensas y caducidad de 180 segundos. Los
+permisos RBAC se acompañan de comprobación explícita de administrador. El catálogo
+se carga al arrancar; los CSV solo modifican configuración. Nombres de técnicas
+se transportan por mensajes propios y no modifican hechizos nativos del cliente.
+Véase [administración](ADMINISTRACION_CATALOGO.md).
+
 ## Preparación futura
 
 `digimon_team` separa posiciones preparadas de almacenamiento y actor principal.

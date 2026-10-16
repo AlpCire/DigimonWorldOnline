@@ -1,4 +1,4 @@
-# WORLD DIGIMON MMO — Alpha 0.3.3 de laboratorio
+# WORLD DIGIMON MMO — Alpha 0.4.0 de laboratorio
 
 Un Tamer dirige un Lobo digital que combate, gana experiencia propia y conserva
 su colección. El humano no inflige daño. Módulo `mod-digimon-tamer` para
@@ -19,7 +19,7 @@ certificación para abrir un servidor público.
 - Dispositivo y alternativa `.digimon`, colección persistente, captura autorizada y cambio de activo.
 - Modo Luchar con órdenes y técnicas en una fila propia sobre las barras inferiores mediante WorldDigimon.
 - Un compañero operativo; catálogo futuro de oso, felino y rapaz desactivado.
-- Tablas de equipo, requisitos de evolución desactivados y desbloqueos por nivel.
+- Evolución automática por especie y nivel; catálogo de ejemplo deshabilitado hasta instalar modelos.
 - Experimento de tres seguidores temporales, reservado a administradores y desactivado por defecto.
 
 El control de combate utiliza la barra del complemento; Gossip conserva el
@@ -37,6 +37,11 @@ Para instalar el complemento y utilizar los controles, leer [Dispositivo y Lucha
 4. Con una cuenta normal, crear un humano y hablar con el guía de Northshire.
 5. Elegir Lobo digital, abrir el dispositivo, seleccionar un enemigo y ordenar atacar.
 
+Administración: `.listadigi`, `.spawndigi Nombre [nivel]`, `.spawndigi borrar` y
+`.digilevel 22`. Catálogo CSV, técnicas por especie y evolución por nivel conservando
+el progreso: [guía de administración](docs/ADMINISTRACION_CATALOGO.md).
+Patamon → Angemon a nivel 22 queda como ejemplo deshabilitado hasta instalar modelos.
+
 Consultar [arquitectura](docs/ARQUITECTURA.md), [pruebas ejecutadas](docs/PRUEBAS.md),
 [protocolo dentro del cliente](docs/PRUEBAS_MANUALES.md),
 [limitaciones](docs/LIMITACIONES.md) y [siguiente desarrollo](docs/PLAN_ALPHA_03.md).
@@ -46,7 +51,8 @@ Consultar [arquitectura](docs/ARQUITECTURA.md), [pruebas ejecutadas](docs/PRUEBA
 Código nuevo bajo GPL-2.0-or-later; pruebas con AzerothGhost MIT. No se incluyen
 cliente, mapas, DBC, modelos, texturas, bases de cuentas ni contraseñas.
 El lobo utiliza referencias a recursos de la instalación local de WoW.
-No se ha certificado ningún modelo Digimon de terceros.
+Existe una prueba gráfica privada satisfactoria de un modelo externo; no se
+distribuye y no acredita compatibilidad exhaustiva ni permiso de redistribución.
 El ZIP Alpha 0.2 ya se ha inventariado y comparado:
 [auditoría y diferencias](docs/AUDITORIA_ALPHA_02.md). El kit de modelos original
 sigue pendiente. Véase [permisos](docs/PERMISOS_RECURSOS.md).

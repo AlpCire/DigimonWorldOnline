@@ -1,5 +1,37 @@
 # Validación — 16/10/2026
 
+## Administración y evolución 0.4.0
+
+Compilación Release sobre el núcleo fijado aprobada. Treinta comprobaciones de
+política y evolución; siete migraciones desde cero y quince comprobaciones de
+integridad en esquema temporal aprobadas. Reinstalación sobre el laboratorio
+ya migrado aprobada sin repetir 007. C++ pasa estilo; SQL mantiene la excepción
+documentada de INSERT IGNORE sin DELETE, incluidas las semillas nuevas.
+
+Dos casos de protocolo aprobaron en 38,926 s con cuentas desechables y una regla
+temporal 1→2 a nivel 22 usando modelos nativos de prueba. Invocación por nombre,
+límite de cinco, retirada, colección intacta, rechazo de modelo no instalado,
+niveles 21/22, forma y nivel del actor real, persistencia y rechazo de cuenta
+normal comprobados. Una muerte real causada por el compañero sube de 21 a 22,
+cambia especie/etapa y conserva la XP sobrante al reconectar. No se presenta como
+prueba gráfica de Patamon/Angemon. La regla de ensayo se retiró; su ejemplo real
+101→102 queda deshabilitado hasta disponer de modelos.
+
+Regresión del binario final: cuenta normal, dos clases simultáneas y entrenador/
+técnicas aprobaron en 12,279 s. Lua 5.1 aprueba la barra y nombres personalizados
+recibidos del servidor, incluidos mensajes falsos rechazados y compatibilidad
+con los paquetes anteriores. Catálogo CSV exportado, validado y reaplicado sin
+cambiar progreso. Los recursos de terceros permanecen fuera del código público.
+Tres comprobaciones negativas del importador rechazan especie sin plantilla,
+evolución con especies deshabilitadas y nivel requerido inválido, sin aplicar datos.
+
+Los intentos fallidos se conservan: la migración inicial detectó una colisión con
+la tabla de diseño futuro de 006, resuelta creando una tabla de reglas distinta;
+los primeros casos nuevos leían antes de recibir actualizaciones de objetos y
+usaban el identificador fijo del antiguo lobo al buscar la forma nueva. Se
+corrigieron las confirmaciones y la consulta de plantilla en el arnés. No se
+ocultan esas ejecuciones como aprobadas. No se repitió toda la batería histórica.
+
 ## Fila propia de compañero 0.3.3
 
 El vídeo del usuario del 16/10/2026 confirma la carga de un modelo experimental

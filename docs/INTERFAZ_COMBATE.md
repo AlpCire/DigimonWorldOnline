@@ -1,4 +1,4 @@
-# Dispositivo y modo Luchar — Alpha 0.3.3
+# Dispositivo y modo Luchar — Alpha 0.4.0
 
 ## Dentro del juego
 
@@ -80,6 +80,9 @@ objeto. La presentación del complemento da al objeto un icono y descripción pr
 - Mensajes privados de estado `WDMMO`, versión V1: estado del actor y cinco espacios
   de equipo, sin consultas SQL por segundo. El cliente solo acepta mensajes del
   propio personaje y no cambia atributos protegidos durante el combate.
+  Cada espacio añade un ID de técnica opcional a los tres campos anteriores;
+  mensajes `T|id|nombre` suministran los nombres del catálogo. El icono sigue
+  procediendo del hechizo instalado, y se aceptan estados antiguos sin ese ID.
 - La compra y gestión de la colección conservan los menús del servidor. La fila
   propia deja espacio sobre las barras inferiores originales; otros complementos
   que ocupen esa zona requieren comprobar compatibilidad.

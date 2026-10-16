@@ -46,5 +46,13 @@ int main()
     Check(HealthFromPercent(85, -10) == 0, "Negative health clamps to zero");
     Check(HealthFromPercent(85, 150) == 85, "Excess health clamps to maximum");
     Check(HealthFromPercent(85, std::numeric_limits<float>::quiet_NaN()) == 0, "Invalid health fails closed");
-    std::cout << "PASS: " << Checks << " independent progression and slot policy checks\n";
+    Check(!EvolutionReady(21, 22, Stage::Rookie, Stage::Champion), "Patamon must stay Rookie at level 21");
+    Check(EvolutionReady(22, 22, Stage::Rookie, Stage::Champion), "Patamon can become Angemon at 22");
+    Check(EvolutionReady(30, 22, Stage::Rookie, Stage::Champion), "Level jumps must cross the evolution threshold");
+    Check(!EvolutionReady(22, 22, Stage::Champion, Stage::Rookie), "Evolution must never lower a stage");
+    Check(!EvolutionReady(22, 22, Stage::Rookie, Stage::Rookie), "Same-stage evolution is not configured here");
+    Check(!EvolutionReady(22, 1, Stage::Rookie, Stage::Champion), "Reject invalid evolution threshold");
+    Progress const evolving = GainExperience({21, 1674}, 2);
+    Check(evolving.Level == 22 && evolving.Experience == 1, "Evolution must preserve level and overflow XP");
+    std::cout << "PASS: " << Checks << " independent progression, evolution and slot policy checks\n";
 }
