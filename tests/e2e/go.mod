@@ -1,0 +1,8 @@
+module world-digimon-mmo/tests/e2e
+
+go 1.26.0
+
+require (
+    github.com/azerothcore/AzerothGhost v1.0.8
+    github.com/go-sql-driver/mysql v1.10.0
+)

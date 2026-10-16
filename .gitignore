@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+build/
+dist/
+logs/
+*.log
+*.sql.gz
+*.zip
+__pycache__/
+go.work
+go.work.sum
+tests/e2e/restart_fixture*.json
