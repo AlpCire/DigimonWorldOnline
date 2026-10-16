@@ -12,6 +12,10 @@ end
 function frameMethods:SetScript(event, fn) self.scripts[event] = fn end
 function frameMethods:HookScript(event, fn) self.scripts[event] = fn end
 function frameMethods:GetID() return self.id or 0 end
+function frameMethods:GetAlpha() return self.alpha or 1 end
+function frameMethods:SetAlpha(value) assert(not combat); self.alpha = value end
+function frameMethods:SetFrameStrata(value) self.strata = value end
+function frameMethods:SetFrameLevel(value) self.level = value end
 function frameMethods:GetItem() return "Dispositivo", "item:900110:0:0:0" end
 function frameMethods:ClearLines() end
 function frameMethods:SetAttribute(key, value)
@@ -33,7 +37,7 @@ function frameMethods:SetTexture(value) self.texture = value end
 function frameMethods:SetCooldown(start, duration) self.duration = duration end
 function frameMethods:CreateTexture() return frame() end
 function frameMethods:CreateFontString() return frame() end
-for _, name in ipairs({"SetFrameStrata", "SetSize", "SetPoint", "SetBackdrop", "SetBackdropColor",
+for _, name in ipairs({"SetSize", "SetPoint", "SetBackdrop", "SetBackdropColor",
     "SetAllPoints", "SetNormalTexture", "SetPushedTexture", "SetHighlightTexture", "RegisterForClicks",
     "RegisterEvent", "SetVertexColor", "SetOwner", "AddLine"}) do
     frameMethods[name] = function() end
@@ -41,6 +45,7 @@ end
 function CreateFrame(_, name) return frame(name) end
 UIParent = frame("UIParent")
 for i = 1, 12 do frame("ActionButton" .. i) end
+ActionButton2.alpha = 0.6
 UISpecialFrames, SlashCmdList = {}, {}
 tinsert = table.insert
 function GetTime() return now end
@@ -96,6 +101,9 @@ assert(bar.label.text == goodText, "invalid or foreign snapshot accepted")
 
 SlashCmdList.WORLDDIGIMON("luchar")
 assert(bar:IsShown() and bindings["3"] == "WorldDigimonAction3")
+assert(ActionButton1:GetAlpha() == 0 and ActionButton2:GetAlpha() == 0)
+assert(frames.WorldDigimonAction3.strata == "HIGH" and frames.WorldDigimonAction3.level > bar.level)
+assert(frames.WorldDigimonAction3.cooldown.level > frames.WorldDigimonAction3.level)
 assert(frames.WorldDigimonAction3.attributes.macrotext == "/s .digimon cast 1")
 assert(frames.WorldDigimonAction4.attributes.macrotext == "/s .digimon cast 2")
 assert(frames.WorldDigimonAction1.attributes.macrotext == "/s .digimon attack")
@@ -109,6 +117,7 @@ assert(bindings["3"] == "WorldDigimonAction3")
 combat = false
 events(nil, "PLAYER_REGEN_ENABLED")
 assert(not bar:IsShown() and next(bindings) == nil, "original bindings were not restored")
+assert(ActionButton1:GetAlpha() == 1 and ActionButton2:GetAlpha() == 0.6, "original visuals were not restored")
 combat = true
 events(nil, "CHAT_MSG_ADDON", "WDMMO", "V1|FIGHT", "WHISPER", "Prueba")
 assert(not bar:IsShown())

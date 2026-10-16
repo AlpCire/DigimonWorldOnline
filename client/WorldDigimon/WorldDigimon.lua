@@ -3,6 +3,7 @@
 local addon = CreateFrame("Frame", "WorldDigimonEvents")
 local bar = CreateFrame("Frame", "WorldDigimonCombatBar", UIParent)
 bar:SetFrameStrata("HIGH")
+bar:SetFrameLevel(100)
 bar:SetSize(510, 62)
 bar:SetPoint("BOTTOMLEFT", ActionButton1, "BOTTOMLEFT", -6, -5)
 bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
@@ -27,6 +28,7 @@ title:SetText("Dispositivo Sagrado")
 tinsert(UISpecialFrames, "WorldDigimonMenu")
 
 local buttons = {}
+local originalAlpha = {}
 local state = {active = 0, hp = 0, focus = 0, slots = {}}
 local wantedFight = false
 local receivedAt = 0
@@ -85,9 +87,18 @@ local function setFight(enabled)
         CloseGossip()
         menu:Hide()
         bar:Show()
+        for i = 1, 12 do
+            local original = _G["ActionButton" .. i]
+            if originalAlpha[i] == nil then originalAlpha[i] = original:GetAlpha() end
+            original:SetAlpha(0)
+        end
         sync()
     else
         bar:Hide()
+        for i, alpha in pairs(originalAlpha) do
+            _G["ActionButton" .. i]:SetAlpha(alpha)
+        end
+        originalAlpha = {}
     end
     bindBar()
 end
@@ -113,6 +124,10 @@ end
 
 for i, action in ipairs(actions) do
     local button = CreateFrame("CheckButton", "WorldDigimonAction" .. i, bar, "SecureActionButtonTemplate")
+    -- Secure templates need explicit layers; raising only the parent leaves
+    -- the original action buttons above these on the actual 3.3.5a client.
+    button:SetFrameStrata("HIGH")
+    button:SetFrameLevel(120)
     button:SetSize(36, 36)
     button:SetPoint("BOTTOMLEFT", _G["ActionButton" .. i], "BOTTOMLEFT")
     button:RegisterForClicks("AnyUp")
@@ -127,6 +142,8 @@ for i, action in ipairs(actions) do
     button:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress")
     button:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
     button.cooldown = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
+    button.cooldown:SetFrameStrata("HIGH")
+    button.cooldown:SetFrameLevel(121)
     button.cooldown:SetAllPoints()
     button.key = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
     button.key:SetPoint("TOPRIGHT", -1, -2)

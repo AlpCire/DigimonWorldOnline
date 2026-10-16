@@ -1,4 +1,4 @@
-# Dispositivo y modo Luchar — Alpha 0.3.1
+# Dispositivo y modo Luchar — Alpha 0.3.2
 
 ## Dentro del juego
 
@@ -11,6 +11,10 @@
 4. Para recuperar la barra anterior, abre Dispositivo y elige **Salir de Luchar**.
 
 La barra ocupa la posición de la barra principal y utiliza sus teclas asignadas.
+Los controles propios tienen una capa explícita por encima de la interfaz y
+ocultan visualmente los doce botones originales mientras Luchar está activo.
+Al salir se recupera la transparencia anterior de cada botón. Esta corrección
+evita que los iconos originales tapen las técnicas del compañero.
 Con los controles predeterminados:
 
 | Posición | Acción |

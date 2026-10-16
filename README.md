@@ -1,4 +1,4 @@
-# WORLD DIGIMON MMO — Alpha 0.3.1 de laboratorio
+# WORLD DIGIMON MMO — Alpha 0.3.2 de laboratorio
 
 Un Tamer dirige un Lobo digital que combate, gana experiencia propia y conserva
 su colección. El humano no inflige daño. Módulo `mod-digimon-tamer` para

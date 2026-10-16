@@ -1,5 +1,22 @@
 # Validación — 16/10/2026
 
+## Corrección de visibilidad 0.3.2
+
+La prueba Lua 5.1 de la barra comprueba capas explícitas de botones y recuperación,
+ocultación de los doce botones originales y restauración de su transparencia
+individual al salir. Conserva las comprobaciones de órdenes y cambios pendientes
+durante combate. Aprobada; el cliente gráfico debe confirmar el resultado visual.
+
+Se repitieron dos escenarios de protocolo: selección única y reconexión con
+guerrero/mago simultáneos; compras, equipo, daño de Mordisco, aura de Aullido,
+recuperación, energía y persistencia. Ambos aprobaron en 7,404 segundos. La prueba
+de selección verifica además que el paquete de creación del compañero contiene
+el display configurado en la base de datos, sin fijar un modelo de terceros en
+el código. Se comprobó un display experimental privado; los archivos de ese
+modelo no se distribuyen. El programa de pruebas necesitó abrir explícitamente
+la conexión de mundo, ausente en la sesión del bot. El fallo previo se conserva
+en el laboratorio. Warden se restauró a 1 al terminar.
+
 ## Actualización de interfaz 0.3.1
 
 El usuario confirma que el nivel del compañero se conserva tras reconectar en su

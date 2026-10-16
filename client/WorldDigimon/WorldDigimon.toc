@@ -2,6 +2,6 @@
 ## Title: World Digimon
 ## Notes: Dispositivo y barra de combate del Tamer
 ## Author: WORLD DIGIMON MMO
-## Version: 0.3.1
+## Version: 0.3.2
 ## SavedVariablesPerCharacter: WorldDigimonDB
 WorldDigimon.lua

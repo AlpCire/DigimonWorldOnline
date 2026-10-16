@@ -7,11 +7,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/azerothcore/AzerothGhost/client"
 	"github.com/azerothcore/AzerothGhost/e2e/e2eharness"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestTamer_TwoClassesUniqueStarterAndRelog(t *testing.T) {
+	worldDB, err := e2eharness.OpenWorldDB()
+	if err != nil || worldDB == nil {
+		t.Fatalf("world database is required to verify companion appearance: %v", err)
+	}
+	defer worldDB.Close()
 	bots := e2eharness.NewScenario(t, e2eharness.ScenarioOpts{Prefix: "DigiA", Bots: []e2eharness.BotSpec{
 		{Role: "warrior", Race: e2eharness.RaceHuman, Class: e2eharness.ClassWarrior, Level: 1},
 		{Role: "mage", Race: e2eharness.RaceHuman, Class: e2eharness.ClassMage, Level: 1},
@@ -24,6 +30,15 @@ func TestTamer_TwoClassesUniqueStarterAndRelog(t *testing.T) {
 		menu := hello(t, bot, guide)
 		menu = selectOption(t, bot, menu, "Elegir Lobo digital")
 		actor := waitOwned(t, bot, 1)[0]
+		var display uint32
+		if err := worldDB.QueryRow("SELECT CreatureDisplayID FROM creature_template_model WHERE CreatureID=900102 AND Idx=0").Scan(&display); err != nil {
+			t.Fatal(err)
+		}
+		object := bot.World.GetObject(actor)
+		if object == nil || object.Value(client.UnitFieldDisplayID) != display {
+			t.Fatalf("companion does not use configured display %d", display)
+		}
+		t.Logf("Companion display %d observed in the real object update", display)
 		var count int
 		if err := bot.CharDB.QueryRow("SELECT COUNT(*) FROM digimon_collection WHERE owner_guid=?", uint32(bot.World.CharGUID())).Scan(&count); err != nil {
 			t.Fatal(err)
