@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS `digimon_collection` (
     UNIQUE KEY `digimon_unique_starter` (`starter_owner`),
     UNIQUE KEY `digimon_capture_once` (`capture_key`),
     UNIQUE KEY `digimon_owner_companion` (`owner_guid`, `id`),
-    CONSTRAINT `digimon_collection_owner` FOREIGN KEY (`owner_guid`) REFERENCES `digimon_tamer`(`owner_guid`) ON DELETE CASCADE,
+    CONSTRAINT `digimon_collection_owner` FOREIGN KEY (`owner_guid`)
+        REFERENCES `digimon_tamer`(`owner_guid`) ON DELETE CASCADE,
     CONSTRAINT `digimon_collection_species` FOREIGN KEY (`species_id`) REFERENCES `digimon_species`(`id`),
     CONSTRAINT `digimon_collection_stage` CHECK (`stage` BETWEEN 1 AND 4),
     CONSTRAINT `digimon_starter_identity` CHECK (
@@ -69,7 +70,8 @@ CREATE TABLE IF NOT EXISTS `digimon_learned` (
     `companion_id` INT UNSIGNED NOT NULL,
     `technique_id` INT UNSIGNED NOT NULL,
     PRIMARY KEY (`companion_id`, `technique_id`),
-    CONSTRAINT `digimon_learned_companion` FOREIGN KEY (`companion_id`) REFERENCES `digimon_collection`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `digimon_learned_companion` FOREIGN KEY (`companion_id`)
+        REFERENCES `digimon_collection`(`id`) ON DELETE CASCADE,
     CONSTRAINT `digimon_learned_technique` FOREIGN KEY (`technique_id`) REFERENCES `digimon_techniques`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
