@@ -100,8 +100,15 @@ def apply_world(cursor):
     item = cursor.fetchone()
     item.update(entry=900110, name='Dispositivo Sagrado', description='Dirige y consulta tu colección digital.',
                 ScriptName='DigimonDevice', maxcount=1, stackable=1, BuyPrice=0, SellPrice=0,
+                spellid_1=18282, spelltrigger_1=0, spellcharges_1=0,
                 spellcooldown_1=0, spellcategory_1=0, spellcategorycooldown_1=0)
     insert_row(cursor, 'item_template', item)
+    # Upgrade only this module's inherited Hearthstone use. 18282 is a local
+    # instant self-target dummy; DigimonDevice handles the use before casting.
+    # Preserve deliberate administrator changes and never edit stock item 6948.
+    cursor.execute("UPDATE item_template SET spellid_1=18282,spelltrigger_1=0,spellcharges_1=0,"
+                   "spellcooldown_1=0,spellcategory_1=0,spellcategorycooldown_1=0 "
+                   "WHERE entry=900110 AND ScriptName='DigimonDevice' AND spellid_1=8690")
     cursor.execute('SELECT map,position_x,position_y,position_z,orientation FROM playercreateinfo WHERE race=1 AND class=1')
     start = cursor.fetchone()
     if not start:

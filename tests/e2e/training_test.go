@@ -4,12 +4,14 @@
 package digimon_test
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/azerothcore/AzerothGhost/client"
 	"github.com/azerothcore/AzerothGhost/e2e/e2eharness"
 )
 
@@ -60,6 +62,7 @@ func TestTamer_TrainerTransactionsEquipmentAndSpell(t *testing.T) {
 	bot.TeleportPad(t, e2eharness.PackagePad(t))
 	guide := bot.Spawn(t, 900100, 10*time.Second)
 	trainer := bot.Spawn(t, 900101, 10*time.Second)
+	target := bot.Spawn(t, 6, 10*time.Second)
 	bot.CombatReady(t)
 	selectOption(t, bot, hello(t, bot, guide), "Elegir Lobo digital")
 	actor := waitOwned(t, bot, 1)[0]
@@ -88,8 +91,108 @@ func TestTamer_TrainerTransactionsEquipmentAndSpell(t *testing.T) {
 	menu = selectOption(t, bot, menu, "Gestionar técnicas")
 	menu = selectOption(t, bot, menu, "Equipar técnica: Aullido de Guerra")
 	assertTraining(t, bot, 45, 2, 2)
-	selectOption(t, bot, menu, "Usar: Aullido de Guerra")
+	statePacket := make(chan string, 1)
+	cancelState := bot.World.AddPacketHook(func(op uint16, data []byte) {
+		if op != client.SmsgMessageChat {
+			return
+		}
+		start := bytes.Index(data, []byte("WDMMO\tV1|S|"))
+		if start < 0 {
+			return
+		}
+		payload := data[start+6:]
+		end := bytes.IndexByte(payload, 0)
+		if end < 0 {
+			return
+		}
+		select {
+		case statePacket <- string(payload[:end]):
+		default:
+		}
+	})
+	defer cancelState()
+	if err := bot.World.SendGMCommand(".digimon sync"); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case snapshot := <-statePacket:
+		fields := strings.Split(snapshot, "|")
+		if len(fields) != 13 || !strings.HasPrefix(fields[8], "17253,") || !strings.HasPrefix(fields[9], "24604,") {
+			t.Fatalf("invalid combat bar snapshot: %q", snapshot)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("server did not send the combat bar snapshot")
+	}
+	// Drive the same direct command used by the combat bar, without Gossip.
+	if err := bot.World.SetTarget(target); err != nil {
+		t.Fatal(err)
+	}
+	damage := make(chan uint32, 4)
+	cancelDamage := bot.World.AddPacketHook(func(op uint16, data []byte) {
+		if op != 0x250 { // SMSG_SPELLNONMELEEDAMAGELOG, pinned Unit.cpp layout.
+			return
+		}
+		r := bytes.NewReader(data)
+		victim, err := packedGUID(r)
+		if err != nil {
+			return
+		}
+		caster, err := packedGUID(r)
+		var spell, amount uint32
+		if err != nil || binary.Read(r, binary.LittleEndian, &spell) != nil || binary.Read(r, binary.LittleEndian, &amount) != nil {
+			return
+		}
+		if victim == target && caster == actor && spell == 17253 && amount > 0 {
+			select {
+			case damage <- amount:
+			default:
+			}
+		}
+	})
+	defer cancelDamage()
+	var bite uint32
+	for attempt := 0; attempt < 4 && bite == 0; attempt++ {
+		if err := bot.World.SendGMCommand(".digimon cast 1"); err != nil {
+			t.Fatal(err)
+		}
+		select {
+		case bite = <-damage:
+		case <-time.After(1300 * time.Millisecond):
+		}
+	}
+	if bite == 0 {
+		t.Fatal("direct Bite command produced no actual spell damage")
+	}
+	if err := bot.World.SendGMCommand(".digimon follow"); err != nil {
+		t.Fatal(err)
+	}
+	// Wait for the shared global recovery before the positive technique.
+	time.Sleep(1600 * time.Millisecond)
+	if err := bot.World.SendGMCommand(".digimon cast 2"); err != nil {
+		t.Fatal(err)
+	}
 	e2eharness.WaitUnitAura(t, bot.World, actor, 24604, 5*time.Second)
+	bot.FlushWorld(t)
+	focus := bot.World.GetObject(actor).Value(client.UnitFieldPower1 + 2)
+	if focus >= 100 {
+		t.Fatal("manual techniques did not consume focus")
+	}
+	if err := bot.World.SendGMCommand(".digimon cast 2"); err != nil {
+		t.Fatal(err)
+	}
+	bot.FlushWorld(t)
+	afterRepeat := bot.World.GetObject(actor).Value(client.UnitFieldPower1 + 2)
+	if afterRepeat < focus {
+		t.Fatal("Howl repeat bypassed its cooldown and consumed focus twice")
+	}
+	deadline := time.Now().Add(6 * time.Second)
+	for bot.World.GetObject(actor).Value(client.UnitFieldPower1+2) <= focus {
+		if time.Now().After(deadline) {
+			t.Fatal("focus never regenerated after manual techniques")
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	bot.CombatStop(t)
 	bot.Relog(t)
 	waitOwned(t, bot, 1)
 	assertTraining(t, bot, 45, 2, 2)
@@ -100,7 +203,7 @@ func TestTamer_TrainerTransactionsEquipmentAndSpell(t *testing.T) {
 	if highestSlot != 1 {
 		t.Fatalf("Rookie must use exactly slots zero and one, got highest %d", highestSlot)
 	}
-	t.Log("PASS: trainer-only purchases, stale-packet replay, separate learned/equipped states, two Rookie slots, actual Furious Howl aura and relog persistence")
+	t.Logf("PASS: trainer-only transactions, two equipped slots, direct Bite damage %d, direct Howl aura, cooldown rejection, focus regeneration and relog persistence", bite)
 }
 
 func TestTamer_InsufficientFundsAndForgedHigherTechnique(t *testing.T) {

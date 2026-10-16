@@ -27,7 +27,8 @@ varios gigabytes y tarda bastante más que las actualizaciones del módulo.
    puertos privados de AzerothCore. El actualizador oficial `ac-db-import` debe
    completar las migraciones del núcleo antes del arranque; el binario de
    compilación usa el actualizador separado.
-5. Revisar los registros y ejecutar las pruebas descritas en
+5. Instalar WorldDigimon con el cliente cerrado siguiendo [Dispositivo y Luchar](INTERFAZ_COMBATE.md).
+6. Revisar los registros y ejecutar las pruebas descritas en
    `PRUEBAS_MANUALES.md`. La interfaz visual requiere el cliente autorizado.
 
 El instalador añade tres NPC/criaturas cerca del inicio humano. Los demás

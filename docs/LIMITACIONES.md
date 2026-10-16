@@ -5,7 +5,7 @@
 - La acogida se sitúa en Northshire y se prueba con humanos. Otras razas, todas
   las clases, grupos, monturas, vehículos, muerte/resurrección e instancias
   requieren ampliar la regresión antes de abrir acceso a amigos.
-- El compañero usa IA propia y menús, sin barra nativa de mascota. Las clases
+- El compañero usa IA propia y la barra del complemento WorldDigimon, sin barra nativa de mascota. Las clases
   originales siguen existiendo; los filtros del servidor restringen su ofensiva.
   No se ha certificado cada objeto, proc o habilidad residual del cliente.
 - Un actor operativo por Tamer, una posición de equipo utilizable, colección
@@ -32,9 +32,13 @@
   versiones evita repetir migraciones completas. DDL en MySQL hace confirmaciones
   implícitas: una interrupción a mitad de un `ALTER TABLE` necesita inspección y
   recuperación de la copia; no se promete atomicidad del despliegue completo.
-- El dispositivo parte de un objeto nativo y su uso se intercepta. Si se desactiva
-  el módulo hay que retirar antes el dispositivo para impedir el comportamiento
-  heredado de la piedra de hogar.
+- El dispositivo actualizado utiliza un uso instantáneo interceptado. Para sustituir
+  su hechizo anterior en el cliente hay que renovar su caché de objetos con WoW cerrado;
+  el instalador del complemento conserva una copia. El control de combate requiere
+  WorldDigimon; los menús del servidor siguen disponibles con `.digimon`.
+- La barra del complemento está diseñada para la interfaz principal original. Los
+  cambios de modo en combate esperan hasta salir de él; no se ha certificado cada
+  combinación con complementos que sustituyan las barras, vehículos o formas.
 - La configuración de IDs debe concordar con instalador y catálogo. Cambiar solo
   el archivo `.conf` no migra objetos, NPC o criaturas existentes.
 - El ensayo de seguidores no demuestra que WoW admita tres mascotas nativas:

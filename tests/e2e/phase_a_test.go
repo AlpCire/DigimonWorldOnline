@@ -17,8 +17,10 @@ func TestTamer_TwoClassesUniqueStarterAndRelog(t *testing.T) {
 		{Role: "mage", Race: e2eharness.RaceHuman, Class: e2eharness.ClassMage, Level: 1},
 	}})
 	e2eharness.TeleportAllPad(t, bots, e2eharness.PackagePad(t))
+	// Both connected clients share the same welcoming NPC. Creating a second
+	// identical spawn at this position can reuse a GUID cached by the harness.
+	guide := bots[0].Spawn(t, 900100, 10*time.Second)
 	for _, bot := range bots {
-		guide := bot.Spawn(t, 900100, 10*time.Second)
 		menu := hello(t, bot, guide)
 		menu = selectOption(t, bot, menu, "Elegir Lobo digital")
 		actor := waitOwned(t, bot, 1)[0]

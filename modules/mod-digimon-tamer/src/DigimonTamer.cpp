@@ -30,10 +30,12 @@
 #include "Transaction.h"
 #include "Util.h"
 #include "World.h"
+#include "WorldPacket.h"
 #include <memory>
 #include <charconv>
 #include <map>
 #include <mutex>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -62,7 +64,8 @@ enum Action : uint32
     Collection,
     Techniques,
     Capture,
-    Back
+    Back,
+    Fight
 };
 
 struct Settings
@@ -117,6 +120,7 @@ struct Tamer
     uint32 Capacity = 30;
     uint32 Active = 0;
     bool Summoned = false;
+    bool Addon = false;
     uint64 CaptureReady = 0;
     uint32 NextOption = 1;
     ObjectGuid Actor;
@@ -180,9 +184,13 @@ template <class... Args> bool Execute(Statement index, Args const&... args)
     return Database->Execute(statement.get());
 }
 
+void SendUI(Player* player, std::string const& message);
+
 void Notify(Player* player, std::string const& message)
 {
     ChatHandler(player->GetSession()).SendSysMessage(message);
+    if (auto state = Tamers.find(OwnerId(player)); state != Tamers.end() && state->second.Addon)
+        SendUI(player, "NOTICE|" + message);
 }
 
 void AddOption(Player* player, uint8 icon, std::string const& text, uint32 sender, uint32 action)
@@ -206,8 +214,10 @@ bool Reload(Player* player)
         return false;
     ObjectGuid const actor = Tamers[owner].Actor;
     uint32 const nextOption = Tamers[owner].NextOption;
+    bool const addon = Tamers[owner].Addon;
     Tamer state;
     state.Actor = actor;
+    state.Addon = addon;
     state.NextOption = nextOption;
     Field* fields = profile->Fetch();
     state.Bits = fields[0].Get<uint64>();
@@ -260,6 +270,50 @@ Companion* Active(Tamer& state)
 Creature* Actor(Player* player, Tamer& state)
 {
     return state.Actor.IsEmpty() ? nullptr : player->GetMap()->GetCreature(state.Actor);
+}
+
+void SendUI(Player* player, std::string const& message)
+{
+    WorldPacket packet;
+    // Addon transport must keep the normal message opcode, even for GM test accounts.
+    ChatHandler::BuildChatPacket(packet, CHAT_MSG_WHISPER, LANG_ADDON, player->GetGUID(), player->GetGUID(),
+                                 "WDMMO\tV1|" + message, 0);
+    player->GetSession()->SendPacket(&packet);
+}
+
+void SendCombatState(Player* player, Tamer& state)
+{
+    if (!state.Addon)
+        return;
+    Companion* companion = Active(state);
+    Creature* actor = Actor(player, state);
+    std::string message = "S|" + std::to_string(state.Active) + "|" +
+                          std::to_string(companion ? companion->Level : 0) + "|" +
+                          std::to_string(actor ? actor->GetHealth() : 0) + "|" +
+                          std::to_string(actor ? actor->GetMaxHealth() : 0) + "|" +
+                          std::to_string(actor ? actor->GetPower(POWER_FOCUS) : 0) + "|" +
+                          std::to_string(actor ? actor->GetMaxPower(POWER_FOCUS) : 0);
+    for (uint8 slot = 0; slot < 5; ++slot)
+    {
+        uint32 spellId = 0;
+        uint32 cooldown = 0;
+        int32 cost = 0;
+        if (companion)
+            if (auto equipped = companion->Equipped.find(slot); equipped != companion->Equipped.end())
+                if (auto technique = TechniqueCatalog.find(equipped->second);
+                    technique != TechniqueCatalog.end() && technique->second.Enabled &&
+                    companion->Learned.count(equipped->second) &&
+                    companion->Evolution >= technique->second.Required &&
+                    CanEquip(companion->Evolution, slot, technique->second.Special))
+                {
+                    spellId = technique->second.Spell;
+                    cooldown = actor ? actor->GetSpellCooldown(spellId) : 0;
+                    if (SpellInfo const* spell = sSpellMgr->GetSpellInfo(spellId))
+                        cost = actor ? spell->CalcPowerCost(actor, spell->GetSchoolMask()) : spell->ManaCost;
+                }
+        message += "|" + std::to_string(spellId) + "," + std::to_string(cost) + "," + std::to_string(cooldown);
+    }
+    SendUI(player, message);
 }
 
 bool Managed(Unit const* unit)
@@ -386,6 +440,7 @@ bool Summon(Player* player, Tamer& state)
     actor->SetFaction(player->GetFaction());
     actor->SetName(species->second.Name);
     actor->SetReactState(REACT_PASSIVE);
+    actor->InitCharmInfo(); // Provides the core's global cooldown manager for manual techniques.
     actor->SetNoCallAssistance(true);
     ApplyStats(actor, *companion);
     state.Actor = actor->GetGUID();
@@ -498,21 +553,60 @@ void UseTechnique(Player* player, Tamer& state, uint32 id)
 {
     Companion* companion = Active(state);
     Creature* actor = Actor(player, state);
-    if (!companion || !actor || !actor->IsAlive() || !IsEquipped(*companion, id) ||
+    if (!player->IsAlive() || !companion || !actor || !actor->IsAlive() || !IsEquipped(*companion, id) ||
         !player->IsWithinDistInMap(actor, 40.0f))
+    {
+        Notify(player, "Necesitas un compañero vivo y cercano con esa técnica equipada.");
         return;
-    Technique const& technique = TechniqueCatalog.at(id);
+    }
+    auto const found = TechniqueCatalog.find(id);
+    if (found == TechniqueCatalog.end() || !found->second.Enabled || !companion->Learned.count(id) ||
+        companion->Evolution < found->second.Required)
+        return;
+    Technique const& technique = found->second;
     SpellInfo const* spell = sSpellMgr->GetSpellInfo(technique.Spell);
     if (!spell)
         return;
-    Unit* target = spell->IsPositive() ? actor : actor->GetVictim();
-    if (!target || !target->IsAlive() || (!spell->IsPositive() && !actor->IsValidAttackTarget(target)))
+    Unit* target = spell->IsPositive() ? actor : player->GetSelectedUnit();
+    if (!target || !target->IsAlive() ||
+        (!spell->IsPositive() && (!target->IsCreature() || !actor->IsValidAttackTarget(target) ||
+                                 !player->IsValidAttackTarget(target) ||
+                                 !player->IsWithinDistInMap(target, 40.0f) || !player->IsWithinLOSInMap(target))))
     {
-        Notify(player, "Ordena atacar a un enemigo antes de utilizar esta técnica.");
+        Notify(player, "Selecciona una criatura enemiga cercana y a la vista para utilizar esta técnica.");
         return;
     }
-    if (actor->CastSpell(target, technique.Spell, false) != SPELL_CAST_OK)
-        Notify(player, "El compañero no puede utilizarla ahora: revisa energía, alcance y recuperación.");
+    if (!spell->IsPositive())
+    {
+        actor->AI()->AttackStart(target);
+        actor->SetFacingToObject(target);
+    }
+    SpellCastResult const result = actor->HasSpellCooldown(technique.Spell)
+                                       ? SPELL_FAILED_NOT_READY
+                                       : actor->CastSpell(target, technique.Spell, false);
+    switch (result)
+    {
+    case SPELL_CAST_OK:
+        actor->AddSpellCooldown(technique.Spell, 0, 0);
+        SendUI(player, "CAST|" + std::to_string(technique.Spell));
+        break;
+    case SPELL_FAILED_NO_POWER:
+        Notify(player, "El compañero necesita más energía; se recupera automáticamente.");
+        break;
+    case SPELL_FAILED_OUT_OF_RANGE:
+        Notify(player, "El compañero se acerca al objetivo. Usa la técnica cuando esté a su alcance.");
+        break;
+    case SPELL_FAILED_NOT_READY:
+        Notify(player, "La técnica todavía está recuperándose.");
+        break;
+    case SPELL_FAILED_LINE_OF_SIGHT:
+        Notify(player, "El compañero no tiene al objetivo a la vista.");
+        break;
+    default:
+        Notify(player, "El compañero no puede usar la técnica ahora (código " + std::to_string(result) + ").");
+        break;
+    }
+    SendCombatState(player, state);
 }
 
 void CaptureTarget(Player* player, Tamer& state)
@@ -662,6 +756,7 @@ void Menu(Player* player, ObjectGuid source, bool welcome)
                 AddOption(player, GOSSIP_ICON_CHAT, "Elegir " + species.Name, ChooseStarter, id);
     if (state.Active)
     {
+        AddOption(player, GOSSIP_ICON_BATTLE, "Luchar — mostrar barra de combate", Main, Fight);
         AddOption(player, GOSSIP_ICON_CHAT, "Invocar compañero", Main, Invoke);
         AddOption(player, GOSSIP_ICON_CHAT, "Retirar compañero", Main, Withdraw);
         AddOption(player, GOSSIP_ICON_CHAT, "Atacar mi objetivo", Main, Attack);
@@ -685,7 +780,7 @@ void Menu(Player* player, ObjectGuid source, bool welcome)
     SendGossipMenuFor(player, 1, source);
 }
 
-void Select(Player* player, ObjectGuid source, bool welcome, uint32 sender, uint32 action)
+void Select(Player* player, ObjectGuid source, bool welcome, uint32 sender, uint32 action, bool reopen = true)
 {
     std::lock_guard<std::recursive_mutex> guard(Mutex);
     CloseGossipMenuFor(player);
@@ -728,6 +823,11 @@ void Select(Player* player, ObjectGuid source, bool welcome, uint32 sender, uint
     {
         switch (action)
         {
+        case Fight:
+            SendCombatState(player, state);
+            SendUI(player, "FIGHT");
+            Notify(player, "Modo Luchar: el complemento WorldDigimon muestra las órdenes en la barra principal.");
+            return;
         case Invoke:
             if (!Summon(player, state))
                 Notify(player, "No se puede invocar ahora: revisa salud, combate y ubicación.");
@@ -803,7 +903,9 @@ void Select(Player* player, ObjectGuid source, bool welcome, uint32 sender, uint
             return;
         }
     }
-    Menu(player, source, welcome);
+    SendCombatState(player, Tamers.at(owner));
+    if (reopen)
+        Menu(player, source, welcome);
 }
 
 class DigimonDatabaseScript final : public DatabaseScript
@@ -1109,7 +1211,17 @@ public:
     DigimonDevice() : ItemScript("DigimonDevice") {}
     bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
     {
-        if (item->GetEntry() == Config.Device)
+        if (item->GetEntry() != Config.Device)
+            return false;
+        // An intercepted item use must unlock the client item cursor/grey state.
+        player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
+        std::lock_guard<std::recursive_mutex> guard(Mutex);
+        if (auto state = Tamers.find(OwnerId(player)); state != Tamers.end() && state->second.Addon)
+        {
+            SendCombatState(player, state->second);
+            SendUI(player, "MENU");
+        }
+        else
             Menu(player, item->GetGUID(), false);
         return true;
     }
@@ -1130,10 +1242,47 @@ public:
         return {{"digimon", OpenDevice, rbac::RBAC_PERM_COMMAND_HELP, Console::No},
                 {"digimonlab", MultiFollowerExperiment, rbac::RBAC_PERM_COMMAND_NPC_ADD, Console::No}};
     }
-    static bool OpenDevice(ChatHandler* handler)
+    static bool OpenDevice(ChatHandler* handler, char const* args)
     {
+        std::lock_guard<std::recursive_mutex> guard(Mutex);
         Player* player = handler->GetSession()->GetPlayer();
-        Menu(player, player->GetGUID(), false);
+        if (!Config.Enabled || !Database || !player->IsInWorld() ||
+            (!Tamers.count(OwnerId(player)) && !Reload(player)))
+            return false;
+        std::string_view const command = args ? args : "";
+        Tamer& state = Tamers.at(OwnerId(player));
+        if (command == "sync" || command == "ui")
+        {
+            state.Addon = true;
+            SendCombatState(player, state);
+            if (command == "ui")
+                SendUI(player, "MENU");
+        }
+        else if (command.substr(0, 5) == "cast ")
+        {
+            uint32 slot = 0;
+            auto const parsed = std::from_chars(command.data() + 5, command.data() + command.size(), slot);
+            if (parsed.ec != std::errc() || parsed.ptr != command.data() + command.size() || slot < 1 || slot > 5)
+                return false;
+            Companion* companion = Active(state);
+            if (!companion || !companion->Equipped.count(uint8(slot - 1)))
+                Notify(player, "Ese espacio no tiene una técnica equipada.");
+            else
+                UseTechnique(player, state, companion->Equipped.at(uint8(slot - 1)));
+        }
+        else
+        {
+            std::map<std::string_view, Action> const actions = {
+                {"attack", Attack}, {"follow", Follow}, {"summon", Invoke}, {"withdraw", Withdraw},
+                {"recover", Recover}, {"capture", Capture}, {"fight", Fight}, {"collection", Collection},
+                {"techniques", Techniques}};
+            if (auto action = actions.find(command); action != actions.end())
+                Select(player, player->GetGUID(), false, Main, action->second, false);
+            else if (command.empty())
+                Menu(player, player->GetGUID(), false);
+            else
+                return false;
+        }
         return true;
     }
     static bool MultiFollowerExperiment(ChatHandler* handler)
@@ -1183,7 +1332,26 @@ struct DigimonLabFollowerAI : ScriptedAI
 
 struct DigimonCompanionAI : ScriptedAI
 {
-    explicit DigimonCompanionAI(Creature* creature) : ScriptedAI(creature) {}
+    TaskScheduler CombatScheduler;
+
+    explicit DigimonCompanionAI(Creature* creature) : ScriptedAI(creature)
+    {
+        CombatScheduler.Schedule(std::chrono::seconds(4), [this](TaskContext context)
+        {
+            std::lock_guard<std::recursive_mutex> guard(Mutex);
+            if (me->IsAlive() && Managed(me))
+                me->ModifyPower(POWER_FOCUS, int32(24.0f * sWorld->getRate(RATE_POWER_FOCUS)));
+            context.Repeat();
+        });
+        CombatScheduler.Schedule(std::chrono::seconds(1), [this](TaskContext context)
+        {
+            std::lock_guard<std::recursive_mutex> guard(Mutex);
+            if (Player* owner = ObjectAccessor::FindPlayer(me->GetOwnerGUID());
+                owner && owner->IsInMap(me) && Managed(me))
+                SendCombatState(owner, Tamers.at(OwnerId(owner)));
+            context.Repeat();
+        });
+    }
     void KilledUnit(Unit* victim) override
     {
         RewardCompanion(me, victim);
@@ -1206,7 +1374,7 @@ struct DigimonCompanionAI : ScriptedAI
                 PersistHealth(owner, state->second);
         }
     }
-    void UpdateAI(uint32) override
+    void UpdateAI(uint32 diff) override
     {
         Player* owner = ObjectAccessor::FindPlayer(me->GetOwnerGUID());
         {
@@ -1217,6 +1385,7 @@ struct DigimonCompanionAI : ScriptedAI
                 return;
             }
         }
+        CombatScheduler.Update(diff);
         if (Unit* target = me->GetVictim())
         {
             if (target->IsAlive() && me->IsValidAttackTarget(target))

@@ -1,5 +1,41 @@
 # Validación — 16/10/2026
 
+## Actualización de interfaz 0.3.1
+
+El usuario confirma que el nivel del compañero se conserva tras reconectar en su
+cliente. Su vídeo anterior muestra entrada, órdenes, botín y subida del lobo a
+nivel 2 con el humano en nivel 1. No se presenta como validación de la barra nueva.
+
+- Compilación Release actualizada y comprobador C++ aprobados. SQL conserva la
+  excepción previa de INSERT IGNORE sin DELETE; no cambian las migraciones.
+- Sintaxis y contrato de WorldDigimon comprobados con Lua 5.1: posiciones de
+  equipo, recuperación, mensajes propios, entrada inválida, órdenes de botones,
+  cambio aplazado en combate, restauración de teclas y presentación del objeto.
+  Es una simulación de API y no una ejecución del sistema protegido del cliente.
+- Prueba de técnicas por protocolo: mensaje real de sincronización con cinco
+  espacios, daño de Mordisco 17253 observado en SMSG_SPELLNONMELEEDAMAGELOG,
+  aura 24604 de Aullido, rechazo de repetición antes de recuperarse, consumo y
+  regeneración de foco, compras/equipo y conservación al reconectar. Aprobada.
+- Combate y recompensas, permisos normales, compras inválidas y rollback aprobados
+  en la regresión. La primera repetición completa detectó una colisión al crear
+  dos guías en el arnés; la prueba se corrigió para compartir un guía. Dos sesiones,
+  inicial único, retirada, invocación y reconexión volvieron a aprobar por separado.
+- Se corrigió el transporte del estado para usar el opcode normal de mensajes
+  incluso cuando el emisor es una cuenta GM de ensayo. El primer fallo de esa
+  comprobación se conserva en los registros, junto con las ejecuciones aprobadas.
+- Registros privados: `alpha031_pruebas_tecnicas.log` (40,415 s),
+  `alpha031_pruebas_regresion_2.log` (cinco casos aprobados y el fallo del arnés),
+  `alpha031_pruebas_dos_sesiones.log` (1,838 s). No se presenta la batería con
+  un fallo como completamente aprobada.
+
+El dispositivo 900110 se actualizó con el mundo detenido, tras respaldo privado
+de las tres bases. La copia se comprobó con gzip y SHA-256; no se ensayó una
+restauración. El complemento se instaló con WoW cerrado, guardando su caché de
+objetos anterior. Warden vuelve a 1 y las condiciones de captura siguen al 35 %.
+La barra nueva, el uso en movimiento y los efectos visuales quedan para supervisión
+en el cliente real. No se han vuelto a ejecutar todas las pruebas de captura,
+instancias o vehículo para esta actualización.
+
 ## Entorno ejecutado
 
 AzerothCore `01339ccfab9cd5d3d28546f79f38ad74d394b148`, Linux Ubuntu 24.04,
