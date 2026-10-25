@@ -67,3 +67,11 @@ No se ha verificado un repositorio accesible del launcher, de DigiModelConverter
 
 ## Reglas de la fase
 No reconstruir desde cero, no fusionar el PR Tamer sin revisión, no afirmar la validez de derechos sobre activos de terceros, no desplegar y no modificar cuentas o bases de datos. Realizar primero un corte vertical mínimo y reproducible.
+
+## Seguimiento de la auditoría (2026-10-25)
+- [G0-01: revisión técnica Tamer](https://github.com/AlpCire/DigimonWorldOnline/issues/3)
+- [G0-02: matriz de QA](https://github.com/AlpCire/DigimonWorldOnline/issues/4)
+- [G0-03: inventario completo](https://github.com/AlpCire/DigimonWorldOnline/issues/5)
+- [G0-04: futuras evoluciones ramificadas](https://github.com/AlpCire/DigimonWorldOnline/issues/6)
+- [Informe técnico independiente](G0_EVIDENCIAS_TAMER.md): 30/30 comprobaciones unitarias C++ con hashes fuente validados; otros entornos pendientes.
+- [Matriz de QA](G0_MATRIZ_QA.md): PASS limitado y prerrequisitos para integración.
