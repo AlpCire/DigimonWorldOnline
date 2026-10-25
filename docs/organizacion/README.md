@@ -75,3 +75,6 @@ No reconstruir desde cero, no fusionar el PR Tamer sin revisión, no afirmar la 
 - [G0-04: futuras evoluciones ramificadas](https://github.com/AlpCire/DigimonWorldOnline/issues/6)
 - [Informe técnico independiente](G0_EVIDENCIAS_TAMER.md): 30/30 comprobaciones unitarias C++ con hashes fuente validados; otros entornos pendientes.
 - [Matriz de QA](G0_MATRIZ_QA.md): PASS limitado y prerrequisitos para integración.
+
+## Propuesta de primer entregable jugable
+- [Vertical slice VS-0/VS-1](G0_VERTICAL_SLICE_PROPUESTA.md): primero loop Tamer reproducible en laboratorio; después una zona corta representativa del Mundo Digital, pendiente de aprobación.
