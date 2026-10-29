@@ -78,3 +78,9 @@ No reconstruir desde cero, no fusionar el PR Tamer sin revisión, no afirmar la 
 
 ## Propuesta de primer entregable jugable
 - [Vertical slice VS-0/VS-1](G0_VERTICAL_SLICE_PROPUESTA.md): primero loop Tamer reproducible en laboratorio; después una zona corta representativa del Mundo Digital, pendiente de aprobación.
+
+## Codex con 24 roles ejecutables
+- [Configuración y piloto multiagente](CODEX_AGENTES.md).
+- [Configuración nativa de Codex](../../.codex/config.toml).
+- [Agentes especializados](../../.codex/agents): 24 archivos `.toml` cargados bajo demanda por una sesión Codex compatible.
+- **No confundir:** los TOML son agentes configurados, no 24 procesos ejecutándose de forma persistente. El piloto todavía necesita arrancarse en Codex.
