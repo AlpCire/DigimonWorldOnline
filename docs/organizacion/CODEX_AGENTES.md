@@ -3,7 +3,7 @@
 **Configuración inicial:** 2026-10-29. **Estado:** archivos creados, piloto en Codex aún NO ejecutado. **Rama de preparación:** `docs/wdm-001-g0-agent-organization` y PR #2.
 
 ## Qué está configurado
-- `.codex/config.toml`: delegación habilitada, límite de **4 subagentes concurrentes** más el orquestador, confirmación interactiva y sandbox `workspace-write`.
+- `.codex/config.toml`: delegación habilitada, límite de **4 subagentes concurrentes** más el orquestador, confirmación interactiva y sandbox `read-only` para el piloto.
 - `.codex/agents/*.toml`: **24 agentes especializados** con nombres, descripciones e instrucciones efectivas de Codex.
 - `AGENTS.md`: orquestación desde hilo principal, tareas independientes, límites de seguridad y control del CEO.
 - `docs/organizacion/`: backlog, tests, inventario, HANDOFF y propuesta de vertical slice.
@@ -40,7 +40,7 @@ En CLI, desde la carpeta clonada, ejecutar `codex`; una vez dentro se puede insp
 El hilo principal puede llamar `product_manager`, `systems_designer`, `cpp_gameplay`, `sql_engineer` y `qa_lead` por etapas, en lugar de todos a la vez. Primero diseño y contratos; después C++/SQL en ramas o worktrees independientes; finalmente QA. No trabajar en paralelo sobre los mismos archivos.
 
 ## Controles de seguridad
-- La instrucción de solo lectura del piloto es **una regla de trabajo**, no una barrera de permisos. Para impedir técnicamente cualquier edición, seleccionar modo de permiso de lectura si está disponible o ejecutar Codex CLI con sandbox de solo lectura para ese ensayo. La configuración por defecto del proyecto es `workspace-write` para permitir futuras implementaciones, siempre con aprobación.
+- El proyecto arranca en sandbox **`read-only`**. Los subagentes no tienen permiso para escribir durante el piloto. Para tareas de implementación posteriores, cambiar explícitamente los permisos de la sesión principal a `workspace-write` y trabajar en ramas/worktrees aislados tras aprobación del CEO.
 - Los subagentes heredan permisos y sandbox del hilo principal. Sus TOML no anulan estos controles.
 - No se han configurado claves ni servicios MCP adicionales.
 - Nunca copiar datos privados, credenciales de servidor, modelos de origen dudoso, archivos de cliente WoW, DBC o texturas a Git.
