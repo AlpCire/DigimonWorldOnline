@@ -11,7 +11,7 @@
 | Web | `AlpCire/DigimonWorldOnlineWeb`: React, TS, TanStack Start, worker, schema y migraciones | CÓDIGO ENCONTRADO; README describe pruebas y backend, sin ejecución independiente en esta auditoría | Build, test, seguridad, integración real, revisar ramas y deployment | 10,12,22 |
 | Web — contenidos | `docs/` contiene seguridad, avatares, foro, cuentas, chatbot, recompensas y otras especificaciones | DOCUMENTACIÓN ENCONTRADA; no equivale a features probadas | Matriz existente vs probado y compatibilidad con juego | 10,03 |
 | Demo web digievolución | `AlpCire/scroll-digi-evolution`: app web con Lovable | CÓDIGO ENCONTRADO; no es prueba de digievolución del servidor | Evaluar como referencia de UI, no como sistema canónico | 20,10 |
-| Launcher v0.2.0 | Referido en conversaciones, no localizado entre estos tres repos | NO VERIFICADO | Localizar fuente, manifest, tests, binarios y pipeline | 11,12 |
+| Launcher v0.2.1 | [Repositorio privado conectado](https://github.com/AlpCire/DigimonWorldOnline-Launcher), README y árbol Tauri 2 inspeccionados el 29/10/2026 | V1: código y documentación localizados; README declara CI, no se ejecutó el launcher aquí | Revisar manifest, tests, artefacto CI y prueba local de lanzamiento en equipo autorizado | 11,12,22 |
 | DigiModelConverter | Referido en conversaciones, no localizado entre estos tres repos | NO VERIFICADO | Localizar fuente, formatos, licencias, casos de importación | 09,17,18 |
 | Terrenos y mapas nuevos | Conceptos tratados; no hay revisión de archivos editables o formatos | NO VERIFICADO | Recopilar mapas y probar carga en cliente de test | 15,16,08 |
 | Cartas coleccionables | Sistema descrito en conversaciones, no auditado contra datos/código | NO VERIFICADO | Localizar CSV/scripts e identificar límites de catálogo | 13,21,07 |
@@ -23,6 +23,7 @@
 - https://github.com/AlpCire/DigimonWorldOnline/tree/feature/tamer-alpha-0.3
 - https://github.com/AlpCire/DigimonWorldOnlineWeb
 - https://github.com/AlpCire/scroll-digi-evolution
+- https://github.com/AlpCire/DigimonWorldOnline-Launcher
 
 ## Niveles de validación
 - V0: no localizado.
