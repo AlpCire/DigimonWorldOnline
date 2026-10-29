@@ -1,0 +1,16 @@
+## Interface: 30300
+## Title: World Digimon
+## Notes: Digivice, captura por habilidad y Digialmacén
+## Author: WORLD DIGIMON MMO
+## Version: 2.4.3
+## SavedVariablesPerCharacter: WorldDigimonDB
+AbilityIcons.lua
+Core.lua
+Theme.lua
+Combat.lua
+Panels.lua
+HUD.lua
+Protocol.lua
+Capture.lua
+Talents.lua
+Map.lua

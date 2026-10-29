@@ -1,0 +1,15 @@
+# Merge with the pinned core's docker-compose.yml and its private .env.
+services:
+  ac-worldserver:
+    image: world-digimon-build:alpha03
+    entrypoint: ["/dist/bin/worldserver"]
+    command: ["-c", "/azerothcore/env/dist/etc/worldserver.conf"]
+    environment:
+      AC_UPDATES_ENABLE_DATABASES: "0"
+    volumes:
+      - digimon-compiled:/dist:ro
+
+volumes:
+  digimon-compiled:
+    external: true
+    name: world-digimon-dist

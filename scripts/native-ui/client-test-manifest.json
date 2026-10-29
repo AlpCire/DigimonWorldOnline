@@ -1,0 +1,21 @@
+{
+  "project": "WORLD DIGIMON MMO",
+  "phase": "native-ui-lab",
+  "clientBuild": "3.3.5.12340",
+  "locale": "esES",
+  "originalWowExeSha256": "BF644876709C591ACC17C0DA8CDF1814EDCC9F1E6BC109A8C0D5C38C79DC953C",
+  "frameXmlProbeExeSha256": "3F783E6F9EC1D7631C70FB29AABEFA20277ABD79349751327D1C8E0DF0A5C583",
+  "frameXmlTocBaseSha256": "3158BEA13225AE51137A389F0F3AB8566E94B6BE84196DD2C1FDA27024677754",
+  "probeMpqSha256": "15D43B9C5CB744B86539D08861543A398D9FF251C4BE351A8F76D795BB2EA3F7",
+  "nativeUiExperimentalMpqSha256": "E0659E8BFC76DA6C1479A1A3CC610CEA8561B2E4DADC9D886B4DEBD898E0F7D9",
+  "nativeUiSavedVariablesTrialMpqSha256": "E7BC8787B12DC78AE75DBF5D3C3A0874D72B898598F2F500D8CF7B7A9A0D66BA",
+  "nativeUiExperimentalEntries": 990,
+  "status": "staged-only",
+  "conditionsForPromotion": [
+    "Probe UI load in isolated client after entering a character",
+    "No interface integrity error or Lua error",
+    "Existing UI functions work without Interface/AddOns/WorldDigimon",
+    "Verify whether FrameXML SavedVariablesPerCharacter persists settings and map discovery; otherwise implement server persistence",
+    "Document redistribution permission for every non-original art asset"
+  ]
+}

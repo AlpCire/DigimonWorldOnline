@@ -1,0 +1,9 @@
+{
+  "name": "world-digimon-native-ui-tools",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Herramientas locales de laboratorio para empaquetar la UI en FrameXML",
+  "dependencies": {
+    "@jamiephan/stormlib": "0.3.0"
+  }
+}

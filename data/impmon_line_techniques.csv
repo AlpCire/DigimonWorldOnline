@@ -1,0 +1,71 @@
+﻿id;name;localized_name;species;species_id;stage;spell_id;level;cooldown;category;damage_type;scaling;effect;control_limited
+1000;Poison Bubbles;Burbujas venenosas;PAGUMON;104;1;4286;5;6;GAME_REFERENCE;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Proyectiles venenosos, daño leve y veneno;0
+1001;Acid Bubbles;Burbujas ácidas;PAGUMON;104;1;70744;7;10;GAME_REFERENCE;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Daño de naturaleza y reducción de armadura;0
+1002;Tackle;Embestida;PAGUMON;104;1;1082;9;5;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Embestida física;0
+1003;Night of Fire;Noche de fuego;IMPMON;103;1;133;10;5;GAME_REFERENCE;FIRE;SPELL_NATIVE_LEVEL_AND_STATS;Proyectil de fuego oscuro;0
+1004;Summon;Invocación;IMPMON;103;1;133;13;10;GAME_REFERENCE;FIRE;SPELL_NATIVE_LEVEL_AND_STATS;Invoca energía de fuego y hielo para atacar;0
+1005;Dash Night of Fire;Embestida nocturna;IMPMON;103;1;100;17;12;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Ataque de fuego durante un desplazamiento;0
+1006;Pillar of Fire;Pilar de fuego;IMPMON;103;1;4629;20;18;GAME_REFERENCE;FIRE;SPELL_NATIVE_LEVEL_AND_STATS;Muro de llamas, daño periódico en área;0
+1007;Marca Traviesa;Marca traviesa;IMPMON;103;1;702;23;20;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Aumenta el daño mágico recibido por el enemigo;0
+1008;Thunder Cloud;Nube eléctrica;WIZARDMON;105;2;403;25;6;GAME_REFERENCE;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Descarga eléctrica;0
+1009;Magic Game;Juego mágico;WIZARDMON;105;2;5782;29;10;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Proyectiles mágicos con posibilidad de confusión;1
+1010;Terror Illusion;Ilusión aterradora;WIZARDMON;105;2;5782;34;22;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Miedo o desorientación breve;1
+1011;Arcane Barrier;Barrera arcana;WIZARDMON;105;2;17;40;35;MMO_CUSTOM;ARCANE;SPELL_NATIVE_LEVEL_AND_STATS;Escudo de absorción;0
+1012;Thunderstorm;Tormenta eléctrica;WIZARDMON;105;2;421;50;25;MMO_CUSTOM;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Tormenta eléctrica de área;0
+1013;Forbidden Magic;Magia prohibida;WIZARDMON;105;2;1459;60;60;MMO_CUSTOM;ARCANE;SPELL_NATIVE_LEVEL_AND_STATS;Potenciador temporal de daño mágico;0
+1014;Abyssal Ritual;Ritual abisal;WIZARDMON;105;2;686;68;45;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Gran ataque oscuro canalizado;0
+1015;Double Impact;Impacto doble;BEELZEMON;106;4;1082;70;6;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Ráfaga doble con Berenjena;0
+1016;Darkness Claw;Garra de oscuridad;BEELZEMON;106;4;1082;72;8;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Ataque físico oscuro con hemorragia;0
+1017;Quick Shot;Disparo rápido;BEELZEMON;106;4;686;75;4;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Disparos rápidos de corto cooldown;0
+1018;Heartbreak Shot;Disparo desgarrador;BEELZEMON;106;4;686;78;16;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Disparo de precisión y alto daño;0
+1019;Behemoth Charge;Carga Behemoth;BEELZEMON;106;4;100;80;25;MMO_CUSTOM;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Carga montada, si existe soporte visual;0
+1020;Demon Lord's Fury;Furia del señor demonio;BEELZEMON;106;4;1459;83;60;MMO_CUSTOM;ARCANE;SPELL_NATIVE_LEVEL_AND_STATS;Aumento temporal de crítico y velocidad;0
+1021;Death Slinger;Disparo mortal;BEELZEMON BLAST MODE;107;4;686;85;12;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Disparo devastador del cañón;0
+1022;Chaos Flare;Estallido del caos;BEELZEMON BLAST MODE;107;4;100;87;25;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Descarga oscura de gran potencia;0
+1023;Double Impact: Blast;Impacto doble: ráfaga;BEELZEMON BLAST MODE;107;4;686;89;8;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Ráfaga combinada;0
+1024;Juouken;Golpe del león espiritual;BEELZEMON BLAST MODE;107;4;5143;90;30;GAME_REFERENCE;ARCANE;SPELL_NATIVE_LEVEL_AND_STATS;Proyectil espiritual con forma de león;0
+1025;Final Annihilation;Aniquilación final;BEELZEMON BLAST MODE;107;4;686;90;90;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Habilidad definitiva de daño en área;0
+1026;Death Claw;Garra mortal;DEVIMON;108;2;1082;25;6;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Daño físico oscuro;0
+1027;Leather Wing;Alas de cuero;DEVIMON;108;2;100;29;10;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Descargas desde las alas, daño en área frontal;0
+1028;Hell Contract;Contrato infernal;DEVIMON;108;2;702;34;20;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Maldición que reduce estadísticas;0
+1029;Deadly Nail;Uña mortal;DEVIMON;108;2;1082;40;8;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Zarpazos sucesivos;0
+1030;Night Raid;Asalto nocturno;MYOTISMON;109;3;686;45;10;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Ataque de murciélagos en área;0
+1031;Bloody Stream;Corriente sangrienta;MYOTISMON;109;3;686;49;7;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Latigazo de energía roja;0
+1032;Dead Scream;Grito mortal;MYOTISMON;109;3;686;53;25;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Paralización breve;1
+1033;Nightmare Wave;Ola de pesadilla;MYOTISMON;109;3;5782;58;30;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Confusión o sueño;1
+1034;Vampiric Drain;Drenaje vampírico;MYOTISMON;109;3;689;62;15;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Daño y robo de vida;0
+1035;Venom Infuse;Infusión de veneno;VENOMMYOTISMON;110;4;4286;65;10;GAME_REFERENCE;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Daño digital corrupto y veneno;0
+1036;Chaos Flame;Llama del caos;VENOMMYOTISMON;110;4;133;69;14;GAME_REFERENCE;FIRE;SPELL_NATIVE_LEVEL_AND_STATS;Aliento de fuego oscuro;0
+1037;Tyrant Savage;Salvajismo tirano;VENOMMYOTISMON;110;4;1082;73;8;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Golpe físico de gran potencia;0
+1038;Inferno;Infierno;VENOMMYOTISMON;110;4;133;78;20;GAME_REFERENCE;FIRE;SPELL_NATIVE_LEVEL_AND_STATS;Ataque frontal de fuego;0
+1039;Pandemonium Flame;Llama del pandemónium;MALOMYOTISMON;111;4;4629;80;20;GAME_REFERENCE;FIRE;SPELL_NATIVE_LEVEL_AND_STATS;Llamas infernales en área;0
+1040;Melting Blood;Sangre fundida;MALOMYOTISMON;111;4;686;83;12;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Ataque oscuro que aplica daño periódico;0
+1041;Darkness Dominion;Dominio de oscuridad;MALOMYOTISMON;111;4;702;86;40;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Aura de debilitamiento en área;0
+1042;Apocalypse Flame;Llama del apocalipsis;MALOMYOTISMON;111;4;133;90;90;MMO_CUSTOM;FIRE;SPELL_NATIVE_LEVEL_AND_STATS;Técnica definitiva de fuego oscuro;0
+1043;Hell's Hand;Mano infernal;BAKEMON;112;2;686;25;6;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Golpe de mano espectral;0
+1044;Death Charm;Talismán mortal;BAKEMON;112;2;689;29;12;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Maldición y drenaje de vida;0
+1045;Nightmare Wave;Ola de pesadilla;BAKEMON;112;2;5782;34;20;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Desorientación;1
+1046;Poison Breath;Aliento venenoso;BAKEMON;112;2;4286;40;15;GAME_REFERENCE;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Nube venenosa;0
+1047;Soul Chopper;Segador de almas;PHANTOMON;113;3;1082;45;7;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Golpe de guadaña;0
+1048;Death Sentence;Sentencia de muerte;PHANTOMON;113;3;702;50;25;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Maldición con daño retardado;0
+1049;Diabolic Star;Estrella diabólica;PHANTOMON;113;3;686;55;10;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Ataque oscuro con su arma encadenada;0
+1050;Phantom Step;Paso fantasma;PHANTOMON;113;3;100;60;20;MMO_CUSTOM;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Desplazamiento espectral;0
+1051;Trump Sword;Espada Trump;PIEDMON;114;4;1082;65;8;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Lanzamiento de espadas mágicas;0
+1052;Clown Trick;Truco de payaso;PIEDMON;114;4;5782;69;20;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Desorientación y daño mágico;1
+1053;Masks Square;Cuadrado de máscaras;PIEDMON;114;4;100;73;25;GAME_REFERENCE;PHYSICAL;SPELL_NATIVE_LEVEL_AND_STATS;Teletransporte corto y mejora de evasión;0
+1054;Toy Wonderness;Maravilla de juguete;PIEDMON;114;4;5143;78;15;GAME_REFERENCE;ARCANE;SPELL_NATIVE_LEVEL_AND_STATS;Ráfaga de viento mágico;0
+1055;Theater of Chaos;Teatro del caos;PIEDMON;114;4;702;80;60;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Área de ilusiones y debilitamiento;0
+1056;Aquary Pressure;Presión acuática;WITCHMON;115;2;686;25;7;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Proyectil de agua a presión;0
+1057;Baluluna Gale;Vendaval lunar;WITCHMON;115;2;5143;29;9;GAME_REFERENCE;ARCANE;SPELL_NATIVE_LEVEL_AND_STATS;Ataque mágico de viento;0
+1058;Poison Storm;Tormenta venenosa;WITCHMON;115;2;4286;34;18;GAME_REFERENCE;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Área venenosa;0
+1059;Witch Barrier;Barrera de bruja;WITCHMON;115;2;17;40;30;MMO_CUSTOM;ARCANE;SPELL_NATIVE_LEVEL_AND_STATS;Escudo mágico;0
+1060;Darkness Wave;Ola de oscuridad;LADYDEVIMON;116;3;686;45;10;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Oleada de energía oscura en forma de murciélagos;0
+1061;Darkness Spear;Lanza de oscuridad;LADYDEVIMON;116;3;686;49;8;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Ataque perforante;0
+1062;Poison;Veneno;LADYDEVIMON;116;3;4286;53;14;GAME_REFERENCE;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Energía corrupta con daño periódico;0
+1063;Dark Seduction;Seducción oscura;LADYDEVIMON;116;3;5782;58;25;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Debilita temporalmente al enemigo;0
+1064;Nightmare Wings;Alas de pesadilla;LADYDEVIMON;116;3;686;62;20;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Ataque oscuro de área;0
+1065;Phantom Pain;Dolor fantasma;LILITHMON;117;4;686;65;12;GAME_REFERENCE;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Ataque oscuro de gran potencia;0
+1066;Nazar Nail;Uña Nazar;LILITHMON;117;4;4286;69;8;GAME_REFERENCE;NATURE;SPELL_NATIVE_LEVEL_AND_STATS;Zarpazo venenoso;0
+1067;Dark Temptation;Tentación oscura;LILITHMON;117;4;5782;73;30;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Control breve de un enemigo;1
+1068;Queen of Darkness;Reina de la oscuridad;LILITHMON;117;4;1459;78;45;MMO_CUSTOM;ARCANE;SPELL_NATIVE_LEVEL_AND_STATS;Potenciador de magia oscura;0
+1069;Seven Sins;Siete pecados;LILITHMON;117;4;702;80;90;MMO_CUSTOM;SHADOW;SPELL_NATIVE_LEVEL_AND_STATS;Técnica definitiva de maldición;0

@@ -1,0 +1,15 @@
+[worldserver]
+DigimonTamer.Enable = 1
+DigimonTamer.WelcomeEntry = 900100
+DigimonTamer.TrainerEntry = 900101
+DigimonTamer.DeviceEntry = 900110
+DigimonTamer.TamerXPRate = 0.70
+DigimonTamer.CompanionXPRate = 1.0
+DigimonTamer.InitialBits = 100
+DigimonTamer.BitsPerKill = 5
+DigimonTamer.CaptureHealthPercent = 25
+DigimonTamer.CaptureCooldownSeconds = 10
+# The prototype supports one summoned actor. Future unlocks never raise this cap.
+DigimonTamer.MaxSimultaneous = 1
+# Administrator-only harmless follower experiment. Keep disabled for players.
+DigimonTamer.ExperimentsEnable = 0
