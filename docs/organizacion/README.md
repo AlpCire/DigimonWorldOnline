@@ -3,12 +3,12 @@
 **Estado:** PROPUESTA G0, pendiente de aceptación explícita. **Fecha de inicio:** 2026-10-25.
 
 ## Propósito
-Coordinar 24 chats especializados con fuentes de verdad verificables. Los chats **no conversan automáticamente entre sí** y su contexto no sustituye a Git. Trabajo de programación mediante Codex/PR; validación real por ejecución de pruebas y revisión humana.
+Coordinar un hilo principal de Codex y hasta tres subagentes especializados en paralelo. Hay 24 roles configurados para invocación bajo demanda. La actividad real ocurre durante una tarea; Git, PR y handoffs conservan las decisiones verificables entre tareas.
 
 ## Jerarquía
 CEO real (usuario) → 02 Product Manager (coordinación) → especialistas; 03 Game Director controla coherencia jugable, 04 Technical Director controla contratos técnicos y 22 QA Lead define evidencia de calidad. El asesor 01 no es un segundo CEO.
 
-## Registro de chats (crear manualmente con el kit de prompts)
+## Registro de roles Codex (.codex/agents)
 | ID | Rol |
 |---|---|
 | 01 | CEO — asesor estratégico |
@@ -36,13 +36,13 @@ CEO real (usuario) → 02 Product Manager (coordinación) → especialistas; 03 
 | 23 | QA Tester / Content Tester |
 | 24 | Community Manager / Live Operations |
 
-**Activación inicial:** chats 02, 03, 04, 22, más el usuario. El resto bajo demanda; no hay ventaja en ejecutar 24 conversaciones a la vez.
+**Activación inicial:** 02 Product Manager como coordinador; 03 Game Director, 04 Technical Director y 22 QA Lead como tres subagentes. Los otros 20 roles permanecen disponibles bajo demanda.
 
 ## Flujo en cada tarea
 1. 02 abre ticket con owner único, revisión y criterios observables.
 2. 03 revisa la experiencia; 04 revisa contratos si aplica.
-3. Especialista realiza trabajo o emite HANDOFF documentado.
-4. Codex o humano implementa en rama; otro agente no edita a la vez los mismos archivos.
+3. El coordinador delega tareas independientes a los especialistas y recoge sus HANDOFF.
+4. En tareas de implementación, cada agente trabaja en rama/worktree aislado y con archivos propios.
 5. 22/23 comprueban evidencias; 02 propone aceptación.
 6. CEO aprueba cambios de alcance, releases, gasto y riesgo legal.
 
@@ -57,7 +57,7 @@ CEO real (usuario) → 02 Product Manager (coordinación) → especialistas; 03 
 - Código MMO y PR Tamer: https://github.com/AlpCire/DigimonWorldOnline
 - Web: https://github.com/AlpCire/DigimonWorldOnlineWeb (sin cambios desde esta fase)
 - Demo digievolución web: https://github.com/AlpCire/scroll-digi-evolution (sin cambios)
-No se ha verificado un repositorio accesible del launcher, de DigiModelConverter ni del servidor completo en producción.
+También está conectado [DigimonWorldOnline-Launcher](https://github.com/AlpCire/DigimonWorldOnline-Launcher), con código Tauri 2 y README de v0.2.1; su ejecución local no se ha reproducido en esta auditoría. No se ha verificado un repositorio de DigiModelConverter ni el servidor completo en producción.
 
 ## Archivos de control
 - [Inventario G0](G0_INVENTARIO.md)
@@ -83,4 +83,4 @@ No reconstruir desde cero, no fusionar el PR Tamer sin revisión, no afirmar la 
 - [Configuración y piloto multiagente](CODEX_AGENTES.md).
 - [Configuración nativa de Codex](../../.codex/config.toml).
 - [Agentes especializados](../../.codex/agents): 24 archivos `.toml` cargados bajo demanda por una sesión Codex compatible.
-- **No confundir:** los TOML son agentes configurados, no 24 procesos ejecutándose de forma persistente. El piloto todavía necesita arrancarse en Codex.
+- **No confundir:** los TOML son agentes configurados, no 24 procesos ejecutándose de forma persistente. La coordinación real de tres especialistas se probó el 29/10/2026; la carga automática de estos TOML desde un checkout del repositorio queda por comprobar.
