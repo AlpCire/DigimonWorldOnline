@@ -1,0 +1,50 @@
+# AGENTS.md — WORLD DIGIMON MMO
+
+## Ámbito
+Estas instrucciones se aplican al repositorio de coordinación y código del MMO. La Constitución operativa, el inventario G0, el backlog y el protocolo de colaboración se encuentran en `docs/organizacion/`. El usuario es el CEO real; el agente 01 solo asesora.
+
+## Orden de autoridad
+1. Instrucciones explícitas del usuario y permisos aplicables.
+2. Evidencia reproducible del repositorio, compilación, cliente y pruebas.
+3. Decisiones aprobadas (ADR) y documentación versionada.
+4. Tareas aprobadas y conversaciones.
+
+## Reglas de trabajo
+- Antes de modificar, inspecciona código, rama, README, dependencias y pruebas. No asumas que una función descrita está operativa.
+- Mantén separados HECHO VERIFICADO, DECLARACIÓN DOCUMENTADA, HIPÓTESIS y PROPUESTA.
+- Una tarea debe indicar identificador WDM, propietario, alcance, dependencias, criterios de aceptación, pruebas y reversión.
+- Implementa cambios en rama/worktree aislado, con PR y revisión. No edites `main`, no fusiones, no despliegues ni borres datos sin aprobación expresa.
+- No fuerces cambios a la rama Tamer `feature/tamer-alpha-0.3`; el PR #1 es trabajo existente que exige revisión antes de integrar.
+- No almacenes secretos, credenciales, datos personales, cliente propietario, modelos o texturas sin permisos acreditados.
+- Ante problemas de licencia de WoW, Digimon, materiales externos o distribución, detén la acción afectada y eleva decisión al CEO tras asesoría jurídica.
+- No proclames tests, arranque, compatibilidad o seguridad sin indicar comando, entorno, fecha y resultado reproducible.
+- Si varios agentes quieren modificar los mismos ficheros, el agente 02 debe coordinar propietarios y orden de entrega.
+- Ahorra tokens con entregas concretas; no sustituyas verificación por documentación.
+
+## Responsables
+- 02 Product Manager: backlog, asignación, coordinación de HANDOFF.
+- 03 Game Director + 13 Systems Designer: diseño jugable.
+- 04 Technical Director: arquitectura, integración y revisión técnica.
+- 05–12: ingeniería, cliente, pipelines, web, launcher, DevOps y seguridad.
+- 14–21: narración, niveles, mundos, 3D, UI y arte.
+- 22–23: aceptación, regresión y pruebas.
+- 24: comunidad y operación.
+- 01: asesor del CEO. El CEO real conserva aprobación final.
+
+## Entrega obligatoria
+ID WDM, estado, evidencia, archivos afectados, tests y resultados, limitaciones, riesgos, HANDOFF y próxima acción. No simules comunicación con otros chats; deja instrucciones transferibles y enlaza el artefacto compartido.
+
+## Fase vigente: G0
+Inventario real y auditoría antes de reescrituras. No se aprueban rediseños irreversibles ni monetización. Ver `docs/organizacion/G0_INVENTARIO.md` y `G0_BACKLOG.md`.
+
+## Ejecución multiagente nativa en Codex
+Este repositorio incluye `.codex/config.toml` y 24 archivos de roles en `.codex/agents/`. El **hilo principal de Codex** es el único orquestador. Usa los especialistas como subagentes reales solo si el trabajo tiene subproblemas independientes, con una tarea cerrada para cada uno.
+
+- Límite inicial: coordinador principal y hasta 3 subagentes simultáneos. Los otros roles se invocan bajo demanda.
+- En el piloto G0 el hilo principal asume `product_manager` y delega en paralelo a `game_director`, `technical_director` y `qa_lead`. Invoca `sql_engineer` en una tarea posterior si el hallazgo SQL requiere análisis específico.
+- Los roles se cargan en clientes Codex locales compatibles desde `.codex/agents/` cuando el repositorio está confiado. NO son chats de ChatGPT y no trabajan sin una sesión/tarea iniciada.
+- En G0 la tarea piloto es estrictamente de **solo lectura del código**. Recorrer la rama Tamer `origin/feature/tamer-alpha-0.3` con `git show` o un worktree aislado; no editar ni fusionar.
+- Cuando un futuro ticket permita implementación, asigna a cada agente archivos/áreas sin solape, en su propia rama o worktree. QA revisa cambios ajenos.
+- Un subagente no aprueba releases; pedir autorización al CEO para merge, despliegue, publicación y operaciones de riesgo.
+- No permitir que los agentes generen a su vez otros árboles de tareas sin control. El principal resume resultados, divergencias, tests y siguientes tickets.
+- Piloto y comandos: `docs/organizacion/CODEX_AGENTES.md`.

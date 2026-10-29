@@ -1,0 +1,13 @@
+# Configuración de agentes WORLD DIGIMON MMO para Codex local.
+# 24 roles definidos en .codex/agents; se ejecutan bajo demanda.
+# El orquestador es el hilo principal de Codex.
+approval_policy = "on-request"
+sandbox_mode = "read-only"
+
+[features]
+multi_agent = true
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 3
+interrupt_message = true
