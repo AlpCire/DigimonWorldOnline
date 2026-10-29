@@ -1,7 +1,16 @@
 ## Interface: 30300
 ## Title: World Digimon
-## Notes: Dispositivo y barra de combate del Tamer
+## Notes: Digivice, captura por habilidad y Digialmacén
 ## Author: WORLD DIGIMON MMO
-## Version: 0.4.0
+## Version: 2.4.3
 ## SavedVariablesPerCharacter: WorldDigimonDB
-WorldDigimon.lua
+AbilityIcons.lua
+Core.lua
+Theme.lua
+Combat.lua
+Panels.lua
+HUD.lua
+Protocol.lua
+Capture.lua
+Talents.lua
+Map.lua

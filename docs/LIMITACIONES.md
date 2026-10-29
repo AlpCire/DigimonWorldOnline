@@ -12,12 +12,14 @@
   inicial de 30. Los desbloqueos de nivel son planificación configurable,
   no acceso a dos o tres combatientes en esta Alpha.
 - Oso, felino y rapaz están catalogados y tienen plantillas locales verificadas,
-  pero no se ofrecen como iniciales ni capturas. El motor de evolución por especie
-  y nivel está implementado; el ejemplo Patamon/Angemon sigue desactivado hasta
-  instalar sus modelos. DigiPociones y técnicas superiores siguen desactivadas.
+  pero no se ofrecen como iniciales ni capturas. Patamon → Angemon está habilitado
+  en el servidor a nivel 22, con involución y selección/restauración de formas desde
+  el Dispositivo. Impmon está registrado para pruebas locales con `.spawndigi`, sin
+  modificar los lobos. Su validación gráfica queda pendiente. Afinidades, catalizadores
+  y misiones evolutivas todavía no forman parte de los requisitos del motor.
 - Las técnicas dependen de especie, etapa, moneda y entrenador; no hay árbol de
   requisitos ni balance definitivo. La curva del compañero
-  es propia: `100 + 75 × nivel`, máximo 80; no reproduce la curva de WoW.
+  es propia: `100 + 75 × nivel`, máximo 100; no reproduce la curva de WoW.
 - Descansar recupera gratis al compañero fuera de combate. Es una ayuda de ensayo,
   pendiente de sustituir por las mecánicas de cuidados y costes del diseño.
 - Las escrituras usan una conexión síncrona y un bloqueo. No se hace SQL por tick,
@@ -53,3 +55,5 @@ Antes de actualizar: copia de seguridad, pruebas sobre una copia de las bases,
 revisión de colisiones de IDs y verificación de los cambios propuestos. El módulo
 no se declara compatible con otros módulos que reemplacen recompensas, daño,
 Gossip, control de mascotas o tasas de experiencia sin una prueba conjunta.
+
+- Empatía se registra por compañero (0–100), no decae y aumenta por victorias válidas (+1), entrega de encargos evolutivos (+5) y descanso (+1, máximo cada 24 horas por compañero). Sus rangos son descriptivos; todavía no bloquea evoluciones ni concede bonificaciones. Los efectos requieren diseño y balance por rama.

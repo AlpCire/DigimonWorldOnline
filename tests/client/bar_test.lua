@@ -1,12 +1,13 @@
 -- SPDX-License-Identifier: GPL-2.0-or-later
 -- Lua 5.1 client contract checks. Does not emulate the protected WoW runtime.
-local frames, sent, bindings = {}, {}, {}
+local frames, sent, bindings, created = {}, {}, {}, {}
 local combat, now, notices, changed = false, 10, {}, 0
 local frameMethods = {}
 local hooks = {}
 local function frame(name)
     local result = setmetatable({name = name, shown = true, scripts = {}, attributes = {}}, {__index = frameMethods})
     if name then frames[name] = result; _G[name] = result end
+    created[#created + 1] = result
     return result
 end
 function frameMethods:SetScript(event, fn) self.scripts[event] = fn end
@@ -40,7 +41,7 @@ function frameMethods:SetCooldown(start, duration) self.duration = duration end
 function frameMethods:CreateTexture() return frame() end
 function frameMethods:CreateFontString() return frame() end
 for _, name in ipairs({"SetBackdrop", "SetBackdropColor",
-    "SetAllPoints", "SetNormalTexture", "SetPushedTexture", "SetHighlightTexture", "RegisterForClicks",
+    "SetAllPoints", "SetNormalTexture", "SetPushedTexture", "SetHighlightTexture", "RegisterForClicks", "SetParent",
     "RegisterEvent", "SetVertexColor", "SetOwner", "AddLine"}) do
     frameMethods[name] = function() end
 end
@@ -92,7 +93,10 @@ assert(sent[#sent] == ".digimon sync")
 assert(not bar:IsShown())
 
 local snapshot = "V1|S|123|3|110|135|75|100|17253,25,0|24604,20,39000|0,0,0|0,0,0|0,0,0"
+events(nil, "CHAT_MSG_ADDON", "WDMMO", "V1|BOND|73", "WHISPER", "Prueba")
+assert(WorldDigimonUI.state.bond == 73, "persistent bond update was not accepted")
 events(nil, "CHAT_MSG_ADDON", "WDMMO", snapshot, "WHISPER", "Prueba")
+assert(WorldDigimonUI.state.bond == 73, "combat snapshot discarded the current bond")
 assert(bar.label.text:find("Nivel 3"))
 assert(frames.WorldDigimonAction3.label == "Mordisco Digital")
 assert(frames.WorldDigimonAction4.cooldown.duration == 39)
@@ -145,11 +149,28 @@ events(nil, "PLAYER_REGEN_ENABLED")
 assert(bar:IsShown())
 events(nil, "CHAT_MSG_ADDON", "WDMMO", "V1|CAST|17253", "WHISPER", "Prueba")
 assert(notices[#notices] == "Orden enviada: Mordisco Digital")
+WorldDigimonUI.Receive("V2|DETAILS_BEGIN")
+WorldDigimonUI.Receive("V2|COMPANION|123|103|Impmon|1|10|25|1234|900103|1|88")
+WorldDigimonUI.Receive("V2|DETAILS_END")
+assert(WorldDigimonUI.companions[123].bond == 88, "companion detail did not retain the bond score")
 local bag = frame("ContainerFrameTest")
 bag.size = 1
 local device = frame("ContainerFrameTestItem1")
+events(nil, "CHAT_MSG_ADDON", "WDMMO", "V1|EVO_BEGIN", "WHISPER", "Prueba")
+assert(frames.WorldDigimonEvolutionMenu:IsShown(), "evolution list did not open")
+events(nil, "CHAT_MSG_ADDON", "WDMMO", "V1|EVO|102|22|Angemon|EVOLVE", "WHISPER", "Prueba")
+local evoButton = created[#created]
+assert(evoButton.text:find("Angemon") and evoButton.text:find("22"), "server evolution option was not displayed")
+evoButton.scripts.OnClick(evoButton)
+assert(sent[#sent] == ".digimon evolve 102", "evolution selection did not send the target to the server")
+assert(not frames.WorldDigimonEvolutionMenu:IsShown() and frames.WorldDigimonMenu:IsShown())
+local oldButtons = #created
+events(nil, "CHAT_MSG_ADDON", "WDMMO", "V1|EVO_BEGIN", "WHISPER", "Prueba")
+events(nil, "CHAT_MSG_ADDON", "WDMMO", "V1|EVO|999|22|Injected|UNLOCKED", "WHISPER", "Prueba")
+assert(#created == oldButtons, "unrecognized server route mode was displayed")
+events(nil, "CHAT_MSG_ADDON", "WDMMO", "V1|EVO_END", "WHISPER", "Prueba")
 hooks.ContainerFrame_Update(bag)
 assert(device.texture == "Interface\\Icons\\INV_Misc_Book_07")
 GameTooltip.scripts.OnTooltipSetItem(GameTooltip)
 assert(GameTooltip.text == "Dispositivo Sagrado")
-print("PASS: independent companion row, unchanged native bar, equipped slots, cooldown, own-server messages, secure macros, combat deferral, binding restoration")
+print("PASS: independent companion row, evolution menu and server selection, equipped slots, cooldown, secure macros, combat deferral, binding restoration")

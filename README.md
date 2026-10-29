@@ -1,4 +1,8 @@
-# WORLD DIGIMON MMO — Alpha 0.4.0 de laboratorio
+# WORLD DIGIMON MMO — estado de laboratorio
+
+Actualización de código al 29/10/2026. El módulo, las migraciones SQL y el addon WorldDigimon 2.4.3 están en desarrollo. La prueba de interfaz integrada sin addon mostró marcos superpuestos y se ha pausado. El launcher y el mapa de Bastión Ígneo revisión 19 permanecen en el laboratorio local; este repositorio no entrega un cliente listo para jugar.
+
+Los modelos, mapas, texturas, ejecutables y copias de seguridad privados quedan fuera del repositorio público mientras no se documente el alcance de distribución de cada recurso. La descripción de Alpha 0.4.0 que sigue es histórica.
 
 Un Tamer dirige un Lobo digital que combate, gana experiencia propia y conserva
 su colección. El humano no inflige daño. Módulo `mod-digimon-tamer` para
@@ -38,9 +42,9 @@ Para instalar el complemento y utilizar los controles, leer [Dispositivo y Lucha
 5. Elegir Lobo digital, abrir el dispositivo, seleccionar un enemigo y ordenar atacar.
 
 Administración: `.listadigi`, `.spawndigi Nombre [nivel]`, `.spawndigi borrar` y
-`.digilevel 22`. Catálogo CSV, técnicas por especie y evolución por nivel conservando
-el progreso: [guía de administración](docs/ADMINISTRACION_CATALOGO.md).
-Patamon → Angemon a nivel 22 queda como ejemplo deshabilitado hasta instalar modelos.
+`.digilevel 22`. Catálogo CSV, técnicas por especie, selección de ramas y formas
+persistentes. El Digimon llega al nivel 100. Patamon → Angemon está activo; Impmon
+está preparado para prueba local con `.spawndigi Impmon`. [Guía](docs/ADMINISTRACION_CATALOGO.md).
 
 Consultar [arquitectura](docs/ARQUITECTURA.md), [pruebas ejecutadas](docs/PRUEBAS.md),
 [protocolo dentro del cliente](docs/PRUEBAS_MANUALES.md),

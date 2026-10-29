@@ -104,13 +104,20 @@ al serializar porcentajes.
 ## Evolución y catálogo
 
 La migración 007 añade etapa/habilitación por especie, alias, asignaciones de
-técnicas y `digimon_evolution_rules`. El motor recorre reglas habilitadas al subir
+técnicas y reglas de evolución heredadas. La migración 008 añade
+`digimon_evolution_edges`, un grafo dirigido con varias salidas y entradas por
+especie, clasificación y fuente. El motor recorre reglas habilitadas al subir
 de nivel: cada transición aumenta etapa, conserva ID/dueño/nivel/XP/salud y
 actualiza especie y etapa en la misma escritura que el progreso. La recompensa
 de moneda comparte transacción. Se desequipa lo incompatible, sin borrar el
 aprendizaje. El actor cambia de plantilla conservando propietario y control.
 
-`.digilevel` usa esas reglas fuera de combate y audita su ajuste; `.spawndigi`
+Si hay más de una salida válida al nivel alcanzado, el avance automático se detiene
+en esa forma; el motor no elige una rama por orden o al azar. El Dispositivo y el
+addon muestran las salidas disponibles y permiten restaurar formas descubiertas. La
+selección se valida y registra junto con el historial en una transacción. El nivel
+máximo del Digimon es 100; el nivel del Tamer sigue independiente. `.digilevel` usa
+esas reglas fuera de combate y audita su ajuste; `.spawndigi`
 usa una plantilla separada sin recompensas y caducidad de 180 segundos. Los
 permisos RBAC se acompañan de comprobación explícita de administrador. El catálogo
 se carga al arrancar; los CSV solo modifican configuración. Nombres de técnicas
@@ -129,3 +136,5 @@ distinta y caducidad de treinta segundos. No pasan la comprobación de compañer
 gestionado, no pueden infligir daño del jugador y no escriben progreso. Se limita
 una tanda por administrador y el ajuste se entrega desactivado. La futura IA de
 apoyo necesita su propia validación de combate, formación y recompensas.
+
+La Empatía se guarda por compañero en `digimon_bond`, separada de las afinidades evolutivas. Aumenta mediante victorias válidas, encargos evolutivos y cuidado diario; se limita a 100 y no decae.

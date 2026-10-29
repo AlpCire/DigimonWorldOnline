@@ -1,6 +1,25 @@
 # Validación — 16/10/2026
 
+## Actualización 0.4.1
+
+El límite del Digimon subió a 100 en el núcleo, comandos, catálogo y base de datos; el nivel del Tamer continúa separado. El Dispositivo y el addon muestran las ramas válidas y permiten restaurar formas descubiertas; el servidor registra cambios e historial. AzerothCore Release compiló e inició con la actualización. Pasaron 41 pruebas C++, 20 comprobaciones SQL, 3 pruebas del catálogo y la prueba Lua 5.1 del menú y su selección validada.
+
+Impmon está empaquetado en un MPQ local y registrado como `.spawndigi Impmon`; las formas existentes 60000–60002 se conservaron en cliente y servidor. Falta que el usuario confirme la apariencia dentro del cliente. El origen y permiso del modelo no están documentados; los recursos permanecen privados y fuera del repositorio.
+
 ## Administración y evolución 0.4.0
+
+### Extensión del catálogo y grafo — 16/10/2026
+
+El catálogo privado inventaría 19 modelos con IDs estables y conserva anotaciones
+manuales; el grafo registra 15 rutas de diseño MMO y marca solo Patamon → Angemon
+como conectada al runtime. Impmon se convirtió a M2 v264 (4.313 vértices, 6.954
+triángulos, 34 huesos, 12 secuencias, 5 texturas); la validación binaria pasó y
+la prueba en WoW y los derechos de origen siguen pendientes. El paquete queda privado.
+
+La migración 008 se ejecutó desde cero, se repitió sin duplicar rutas y pasó 20
+comprobaciones SQL en un esquema temporal, incluida una bifurcación y rechazo de
+nivel 86. La prueba C++ de política pasó 38 casos. El módulo completo todavía no
+se ha recompilado con estos últimos cambios.
 
 Compilación Release sobre el núcleo fijado aprobada. Treinta comprobaciones de
 política y evolución; siete migraciones desde cero y quince comprobaciones de

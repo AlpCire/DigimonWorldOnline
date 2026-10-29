@@ -13,10 +13,14 @@ import pymysql
 TABLES = {
     'digimon_species': ('id', 'creature_entry', 'name', 'starter_enabled', 'capture_entry', 'stage', 'enabled'),
     'digimon_aliases': ('name', 'species_id'),
-    'digimon_techniques': ('id', 'name', 'spell_id', 'required_stage', 'price', 'enabled', 'special'),
+    'digimon_techniques': ('id', 'name', 'spell_id', 'required_stage', 'price', 'enabled', 'special',
+                          'localized_name', 'category', 'min_level', 'cooldown_override_ms', 'damage_type',
+                          'scaling_model', 'effect_note', 'control_limited'),
     'digimon_species_techniques': ('species_id', 'technique_id'),
-    'digimon_evolution_rules': ('source_species', 'target_species', 'required_level', 'enabled'),
+    'digimon_evolution_edges': ('source_species', 'target_species', 'required_level', 'enabled',
+                                'classification', 'source_note', 'confidence'),
 }
+TEXT_COLUMNS = {'name', 'localized_name', 'source_note', 'effect_note', 'scaling_model'}
 
 
 def key(name):
@@ -35,10 +39,30 @@ def read_csvs(folder):
                 if None in row or any(v is None for v in row.values()):
                     raise ValueError('Incomplete CSV row: ' + table)
                 for column, value in row.items():
-                    if column == 'name':
+                    if column in TEXT_COLUMNS:
                         value = value.strip()
-                        if not value or len(value) > 80 or len(value.encode('utf-8')) > 160 or any(ord(c) < 32 or c == '|' for c in value):
-                            raise ValueError('Invalid name: ' + table)
+                        if (column in ('name', 'localized_name') and not value) or len(value) > 255 or any(ord(c) < 32 or c == '|' for c in value):
+                            raise ValueError('Invalid text: ' + table + '.' + column)
+                        row[column] = value
+                    elif column in ('classification', 'category'):
+                        value = value.strip()
+                        choices = ('CANONICAL', 'GAME_REFERENCE', 'MMO_CUSTOM') if column == 'classification' else (
+                            'OFFICIAL', 'GAME_REFERENCE', 'MMO_CUSTOM')
+                        if value not in choices:
+                            raise ValueError('Invalid classification/category: ' + table)
+                        row[column] = value
+                    elif column == 'damage_type':
+                        value = value.strip()
+                        if value not in ('PHYSICAL', 'FIRE', 'SHADOW', 'NATURE', 'ARCANE'):
+                            raise ValueError('Invalid damage type: ' + table)
+                        row[column] = value
+                    elif column == 'confidence':
+                        try:
+                            value = float(value)
+                        except ValueError as error:
+                            raise ValueError('Expected decimal: ' + table + '.' + column) from error
+                        if not 0.0 <= value <= 1.0:
+                            raise ValueError('Confidence outside 0..1: ' + table)
                         row[column] = value
                     elif column == 'capture_entry' and not value.strip():
                         row[column] = None
@@ -62,9 +86,10 @@ def validate(data, cursor, dbc):
     species = {r['id']: r for r in data['digimon_species']}
     techniques = {r['id']: r for r in data['digimon_techniques']}
     for table, rows in data.items():
-        unique(rows, TABLES[table][:2] if table == 'digimon_species_techniques' else TABLES[table][:1])
+        unique(rows, TABLES[table][:2] if table in ('digimon_species_techniques', 'digimon_evolution_edges')
+               else TABLES[table][:1])
         for row in rows:
-            for flag in ('enabled', 'starter_enabled', 'special'):
+            for flag in ('enabled', 'starter_enabled', 'special', 'control_limited'):
                 if flag in row and row[flag] not in (0, 1):
                     raise ValueError('Invalid flag: ' + table + '.' + flag)
     unique(data['digimon_species'], ('creature_entry',))
@@ -90,19 +115,22 @@ def validate(data, cursor, dbc):
         raise ValueError('Invalid Spell.dbc')
     spell_ids = {struct.unpack_from('<I', spells, 20 + i * size)[0] for i in range(count)}
     for row in techniques.values():
-        if not row['id'] or row['required_stage'] not in range(1, 5) or (row['enabled'] and row['spell_id'] not in spell_ids):
+        if (not row['id'] or row['required_stage'] not in range(1, 5) or row['min_level'] not in range(1, 101)
+                or (row['enabled'] and row['spell_id'] not in spell_ids)):
             raise ValueError('Invalid technique/spell: ' + row['name'])
     for row in data['digimon_species_techniques']:
         if row['species_id'] not in species or row['technique_id'] not in techniques:
             raise ValueError('Technique assignment references a missing entry')
-    for row in data['digimon_evolution_rules']:
+    for row in data['digimon_evolution_edges']:
         source, target = species.get(row['source_species']), species.get(row['target_species'])
-        if not source or not target or source is target or row['required_level'] not in range(2, 81):
+        if not source or not target or source is target or row['required_level'] not in range(2, 101):
             raise ValueError('Invalid evolution')
-        if target['stage'] <= source['stage']:
-            raise ValueError('Evolution must increase stage; cycles are not permitted')
+        if target['stage'] < source['stage']:
+            raise ValueError('Evolution cannot decrease stage; cycles are not permitted')
         if row['enabled'] and not (source['enabled'] and target['enabled']):
             raise ValueError('Install/enable both species before enabling evolution')
+        if row['enabled'] and row['required_level'] > 100:
+            raise ValueError('Current companion level cap is 100; higher-level routes must remain disabled')
 
 
 def main():
@@ -143,7 +171,7 @@ def main():
                     backup = args.directory / ('backup-' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '.json')
                     with backup.open('x', encoding='utf-8') as handle:
                         json.dump(before, handle, ensure_ascii=False, indent=2)
-                    for table in ('digimon_aliases', 'digimon_species_techniques', 'digimon_evolution_rules'):
+                    for table in ('digimon_aliases', 'digimon_species_techniques'):
                         cursor.execute('DELETE FROM ' + table)
                     for table, columns in TABLES.items():
                         marks = ','.join(['%s'] * len(columns))

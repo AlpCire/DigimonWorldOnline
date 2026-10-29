@@ -7,7 +7,6 @@ DigimonTamer.TamerXPRate = 0.70
 DigimonTamer.CompanionXPRate = 1.0
 DigimonTamer.InitialBits = 100
 DigimonTamer.BitsPerKill = 5
-DigimonTamer.CaptureChance = 35
 DigimonTamer.CaptureHealthPercent = 25
 DigimonTamer.CaptureCooldownSeconds = 10
 # The prototype supports one summoned actor. Future unlocks never raise this cap.

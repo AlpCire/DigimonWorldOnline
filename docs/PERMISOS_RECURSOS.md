@@ -1,5 +1,15 @@
 # Recursos y permisos
 
+## Actualización del 25/10/2026
+
+El responsable del proyecto ha comunicado que **ya dispone de permisos para
+utilizar Digimon**. Se registra como declaración del usuario; todavía falta
+archivar la autorización y anotar su titular, fecha, territorios, duración,
+material cubierto y condiciones de uso, modificación, atribución y distribución.
+Hasta completar esa ficha no se atribuye a un modelo concreto permiso para
+incluirlo en un repositorio público, parche descargable o launcher. El uso en el
+laboratorio local puede continuar con los recursos ya instalados.
+
 El código nuevo del módulo se publica bajo GPL-2.0-or-later, de acuerdo con su
 integración en AzerothCore. Las herramientas externas conservan sus licencias;
 no se incorporan sus fuentes sin atribución.
@@ -26,8 +36,9 @@ El ZIP `WORLD_DIGIMON_MMO_Alpha_0_2.zip` se recibió y auditó el 16/10/2026:
 [informe](AUDITORIA_ALPHA_02.md). Contiene código y documentación, sin modelos,
 texturas ni un archivo LICENSE. Se conserva privado y no se atribuye una licencia
 al material recibido; no se han copiado bloques de su código al repositorio.
-El kit `WORLD_DIGIMON_MMO_Kit_Modelos_WoW_335a.zip` sigue ausente. Ningún Digimon
-procedente de terceros está certificado para el cliente 3.3.5a.
+El kit `WORLD_DIGIMON_MMO_Kit_Modelos_WoW_335a.zip` no constaba en la auditoría
+inicial. La nueva autorización comunicada por el usuario está pendiente de
+vincularse a los archivos concretos que se incorporen al cliente 3.3.5a.
 
 Antes de añadir una criatura propia: registrar autor y titular, origen, licencia
 exacta, permiso de modificación y distribución, hashes de los archivos, revisión

@@ -47,10 +47,26 @@ try:
             cursor.execute(migration.read_text(encoding='utf-8'))
             while cursor.nextset():
                 pass
+        # The graph seed migration is idempotent and can be replayed without duplicate edges.
+        graph_migration = next(migration for migration in migrations if migration.name.startswith('008_'))
+        cursor.execute(graph_migration.read_text(encoding='utf-8'))
+        while cursor.nextset():
+            pass
         cursor.execute('SELECT owner_guid,slot,companion_id FROM digimon_team ORDER BY owner_guid')
         assert cursor.fetchall() == ((1, 0, 101), (2, 0, 102))
         checks += 1
         cursor.execute('INSERT INTO digimon_collection (id,owner_guid,species_id) VALUES (103,2,1),(104,1,1)')
+        cursor.execute('SELECT combat_role FROM digimon_collection WHERE id=101')
+        assert cursor.fetchone() == ('DPS',)
+        cursor.execute("UPDATE digimon_collection SET combat_role='TANK' WHERE id=101")
+        cursor.execute('INSERT INTO digimon_talent_points (companion_id,talent_id) VALUES (101,1),(101,3)')
+        cursor.execute('SELECT talent_id FROM digimon_talent_points WHERE companion_id=101 ORDER BY id')
+        assert cursor.fetchall() == ((1,), (3,))
+        reject(cursor, 'INSERT INTO digimon_talent_points (companion_id,talent_id) VALUES (101,4)', {3819})
+        reject(cursor, 'INSERT INTO digimon_talent_points (companion_id,talent_id) VALUES (999999,1)', {1452})
+        cursor.execute('SELECT spell_id FROM digimon_techniques WHERE id=2002')
+        assert cursor.fetchone() == (2061,)
+        checks += 4
         reject(cursor, 'INSERT INTO digimon_collection (owner_guid,species_id,is_starter,starter_owner) '
                        'VALUES (1,1,1,1)', {1062})
         reject(cursor, 'INSERT INTO digimon_collection (owner_guid,species_id,is_starter) VALUES (1,1,1)', {3819})
@@ -67,9 +83,59 @@ try:
         cursor.execute("SELECT target_species,required_level,enabled FROM digimon_evolution_rules WHERE source_species=101")
         assert cursor.fetchone() == (102, 22, 0)
         checks += 1
-        cursor.execute("INSERT INTO digimon_techniques VALUES (101,'Nombre Digital',17253,1,20,1,0)")
+        cursor.execute("SELECT target_species,required_level,enabled,classification,confidence "
+                       "FROM digimon_evolution_edges WHERE source_species=101")
+        assert cursor.fetchone() == (102, 22, 0, 'MMO_CUSTOM', 0.0)
+        checks += 1
+        cursor.execute("INSERT INTO digimon_species (id,creature_entry,name,stage,enabled) "
+                       "VALUES (118,900200,'Test Branch',2,0),(119,900201,'Test Branch 2',2,0)")
+        cursor.execute("INSERT INTO digimon_evolution_edges "
+                       "(source_species,target_species,required_level,enabled,classification,source_note,confidence) "
+                       "VALUES (101,118,22,0,'MMO_CUSTOM','schema branch test',0)")
+        cursor.execute("SELECT COUNT(*) FROM digimon_evolution_edges WHERE source_species=101")
+        assert cursor.fetchone()[0] == 2
+        checks += 1
+        reject(cursor, "INSERT INTO digimon_evolution_edges "
+                       "(source_species,target_species,required_level) VALUES (101,118,22)", {1062})
+        cursor.execute("INSERT INTO digimon_evolution_edges "
+                       "(source_species,target_species,required_level,enabled) VALUES (101,119,85,1)")
+        cursor.execute("INSERT INTO digimon_evolution_edges "
+                       "(source_species,target_species,required_level,enabled) VALUES (118,119,100,1)")
+        reject(cursor, "INSERT INTO digimon_evolution_edges "
+                       "(source_species,target_species,required_level) VALUES (119,101,101)", {3819})
+        cursor.execute("INSERT INTO digimon_collection (owner_guid,species_id,level) VALUES (1,1,100)")
+        reject(cursor, "INSERT INTO digimon_collection (owner_guid,species_id,level) VALUES (2,1,101)", {3819})
+        cursor.execute("INSERT INTO digimon_companion_forms (companion_id,species_id) VALUES (101,101)")
+        cursor.execute("INSERT INTO digimon_evolution_history (companion_id,from_species,to_species,level,action) "
+                       "VALUES (101,101,102,100,'EVOLVE')")
+        cursor.execute('SELECT points,last_care_at FROM digimon_bond WHERE companion_id=101')
+        assert cursor.fetchone() is None
+        cursor.execute('INSERT INTO digimon_bond(companion_id,points) VALUES (101,0)')
+        cursor.execute('UPDATE digimon_bond SET points=LEAST(points+37,100) WHERE companion_id=101')
+        cursor.execute('SELECT points FROM digimon_bond WHERE companion_id=101')
+        assert cursor.fetchone() == (37,)
+        checks += 1
+        reject(cursor, 'INSERT INTO digimon_bond(companion_id,points) VALUES (101,101)', {3819})
+        reject(cursor, 'INSERT INTO digimon_bond(companion_id,points) VALUES (999999,1)', {1452})
+        cursor.execute("INSERT INTO digimon_techniques (id,name,spell_id,required_stage,price,enabled,special) "
+                       "VALUES (101,'Nombre Digital',17253,1,20,1,0)")
         cursor.execute('SELECT COUNT(*) FROM digimon_techniques WHERE spell_id=17253')
         assert cursor.fetchone()[0] == 2
+        checks += 1
+        cursor.execute('SELECT COUNT(*) FROM digimon_techniques WHERE id BETWEEN 1000 AND 1069')
+        assert cursor.fetchone()[0] == 70
+        checks += 1
+        cursor.execute("SELECT min_level,cooldown_override_ms,category,localized_name FROM digimon_techniques WHERE name='Night of Fire'")
+        assert cursor.fetchone() == (10, 5000, 'GAME_REFERENCE', 'Noche de fuego')
+        checks += 1
+        cursor.execute('SELECT COUNT(*) FROM digimon_techniques WHERE control_limited=1')
+        assert cursor.fetchone()[0] == 7
+        checks += 1
+        cursor.execute('SELECT COUNT(*) FROM digimon_species WHERE id BETWEEN 104 AND 117 AND enabled=0')
+        assert cursor.fetchone()[0] >= 14
+        checks += 1
+        cursor.execute('SELECT COUNT(*) FROM digimon_evolution_edges WHERE source_species BETWEEN 103 AND 117 AND enabled=0')
+        assert cursor.fetchone()[0] == 9
         checks += 1
         cursor.execute('SELECT COUNT(*) FROM digimon_schema_version')
         assert cursor.fetchone()[0] == len(migrations)

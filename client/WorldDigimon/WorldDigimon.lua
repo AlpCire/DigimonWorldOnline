@@ -17,7 +17,7 @@ bar.label = bar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 bar.label:SetPoint("TOPLEFT", 10, -6)
 
 local menu = CreateFrame("Frame", "WorldDigimonMenu", UIParent)
-menu:SetSize(310, 350)
+menu:SetSize(310, 390)
 menu:SetPoint("CENTER")
 menu:SetFrameStrata("DIALOG")
 menu:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -29,6 +29,20 @@ title:SetPoint("TOP", 0, -25)
 title:SetText("Dispositivo Sagrado")
 tinsert(UISpecialFrames, "WorldDigimonMenu")
 
+local evoMenu = CreateFrame("Frame", "WorldDigimonEvolutionMenu", UIParent)
+evoMenu:SetSize(340, 370)
+evoMenu:SetPoint("CENTER")
+evoMenu:SetFrameStrata("DIALOG")
+evoMenu:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", tile = true, tileSize = 32,
+    edgeSize = 32, insets = {left = 10, right = 10, top = 10, bottom = 10}})
+evoMenu:Hide()
+local evoTitle = evoMenu:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+evoTitle:SetPoint("TOP", 0, -25)
+evoTitle:SetText("Formas del Digimon")
+tinsert(UISpecialFrames, "WorldDigimonEvolutionMenu")
+local evoButtons = {}
+local evoCount = 0
 local buttons = {}
 local state = {active = 0, hp = 0, focus = 0, slots = {}}
 local wantedFight = false
@@ -181,6 +195,7 @@ local menuItems = {
     {"Invocar compañero", function() request("summon"); menu:Hide() end},
     {"Retirar compañero", function() request("withdraw"); menu:Hide() end},
     {"Colección y espacios", function() request("collection"); menu:Hide() end},
+    {"Evoluciones", function() request("evolutions"); menu:Hide() end},
     {"Gestionar técnicas", function() request("techniques"); menu:Hide() end},
     {"Salir de Luchar", function() setFight(false); menu:Hide() end},
     {"Cerrar", function() menu:Hide() end},
@@ -191,6 +206,29 @@ for i, entry in ipairs(menuItems) do
     button:SetPoint("TOP", 0, -54 - (i - 1) * 39)
     button:SetText(entry[1])
     button:SetScript("OnClick", entry[2])
+end
+
+local function clearEvolutionOptions()
+    for _, button in ipairs(evoButtons) do button:Hide(); button:SetParent(nil) end
+    evoButtons = {}
+    evoCount = 0
+end
+
+local function addEvolutionOption(id, level, name, mode)
+    evoCount = evoCount + 1
+    local button = CreateFrame("Button", nil, evoMenu, "UIPanelButtonTemplate")
+    button:SetSize(280, 30)
+    button:SetPoint("TOP", 0, -52 - (evoCount - 1) * 36)
+    local label = mode == "EVOLVE" and ("Digievolucionar a " .. name .. " (nivel " .. level .. ")") or
+                  ("Volver a " .. name)
+    button:SetText(label)
+    button:SetScript("OnClick", function()
+        request("evolve " .. id)
+        evoMenu:Hide()
+        menu:Show()
+        sync()
+    end)
+    evoButtons[#evoButtons + 1] = button
 end
 
 local launcher = CreateFrame("Button", "WorldDigimonLauncher", UIParent, "UIPanelButtonTemplate")
@@ -280,6 +318,22 @@ addon:SetScript("OnEvent", function(_, event, prefix, message, channel, sender)
             setFight(true)
         elseif fields[2] == "MENU" then
             menu:Show()
+        elseif fields[2] == "EVO_BEGIN" then
+            clearEvolutionOptions()
+            evoMenu:Show()
+        elseif fields[2] == "EVO" and #fields == 6 then
+            local id, level, name, mode = tonumber(fields[3]), tonumber(fields[4]), fields[5], fields[6]
+            if id and id > 0 and id % 1 == 0 and level and level > 0 and level <= 100 and #name > 0 and
+               #name <= 80 and (mode == "EVOLVE" or mode == "REUSE") then
+                addEvolutionOption(id, level, name, mode)
+            end
+        elseif fields[2] == "EVO_END" then
+            if evoCount == 0 then
+                local empty = evoMenu:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+                empty:SetPoint("CENTER", 0, 0)
+                empty:SetText("No hay formas disponibles")
+                evoButtons[1] = empty
+            end
         elseif fields[2] == "NOTICE" then
             notice(fields[3] or "")
         elseif fields[2] == "CAST" then

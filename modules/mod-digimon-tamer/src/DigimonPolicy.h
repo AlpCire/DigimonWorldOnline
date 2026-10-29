@@ -22,9 +22,9 @@ inline uint8_t TechniqueSlots(Stage stage)
     switch (stage)
     {
     case Stage::Rookie:
-        return 2;
-    case Stage::Champion:
         return 3;
+    case Stage::Champion:
+        return 4;
     case Stage::Ultimate:
         return 4;
     case Stage::Mega:
@@ -65,10 +65,20 @@ struct Progress
 
 inline bool EvolutionReady(uint8_t level, uint8_t required, Stage source, Stage target)
 {
-    return required >= 2 && required <= 80 && level >= required && target > source && target <= Stage::Mega;
+    return required >= 2 && required <= 100 && level >= required && target >= source && target <= Stage::Mega;
 }
 
-inline Progress GainExperience(Progress progress, uint32_t amount, uint8_t maxLevel = 80)
+inline bool DevolutionReady(uint8_t level, uint8_t required, Stage current, Stage previous)
+{
+    return level < required && EvolutionReady(required, required, previous, current);
+}
+
+inline constexpr bool HasUniqueEvolutionChoice(uint32_t eligibleRoutes)
+{
+    return eligibleRoutes == 1;
+}
+
+inline Progress GainExperience(Progress progress, uint32_t amount, uint8_t maxLevel = 100)
 {
     progress.Experience = amount > std::numeric_limits<uint64_t>::max() - progress.Experience
                               ? std::numeric_limits<uint64_t>::max()

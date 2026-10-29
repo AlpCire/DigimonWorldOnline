@@ -1,4 +1,4 @@
-# Administración, modelos y evolución — Alpha 0.4.0
+# Administración, modelos y evolución — Alpha 0.4.1
 
 ## Comandos dentro del juego
 
@@ -14,7 +14,7 @@ o activar el modo GM no concede estos permisos.
 | `.digilevel 22` | Ajusta al nivel 22 su compañero activo y guarda el cambio |
 
 Los nombres pueden contener espacios. El último número opcional es el nivel,
-entre 1 y 80. Las pruebas caducan a los 180 segundos; máximo cinco por
+entre 1 y 100. Las pruebas caducan a los 180 segundos; máximo cinco por
 administrador. También desaparecen al salir su creador del mapa o desconectarse.
 Son blancos pasivos para comprobar modelos y combate: no dan botín ni XP, no son
 capturables y no añaden filas a la colección. No son compañeros adicionales ni
@@ -23,8 +23,12 @@ apariciones permanentes del mundo. No se sustituye un modelo que falte por otro.
 `.digilevel` trabaja fuera de combate sobre el compañero activo propio, aunque
 esté retirado. Necesita que esté vivo. Pone a cero la XP parcial del nivel ajustado,
 aplica una evolución si se ha subido hasta su requisito y registra cuenta,
-compañero, forma y niveles anteriores/nuevos en `digimon_admin_audit`. Bajar un
-nivel no revierte la forma. No ajusta el nivel del humano.
+compañero, forma y niveles anteriores/nuevos en `digimon_admin_audit`. Si baja
+por debajo del umbral de su forma, involuciona siguiendo la regla activa en sentido
+inverso: Angemon 22 → Patamon 21. En el umbral exacto conserva la forma evolucionada.
+Si varias especies anteriores resultan posibles, no elige una arbitrariamente.
+No ajusta el nivel del humano. Al subir, tanto por XP como con este comando,
+el compañero muestra el efecto nativo de subida de nivel (visual kit 6375).
 
 Tras cambiar los permisos de una cuenta, cerrar sesión y volver a conectar.
 Para jugar y recibir recompensas normales con cuenta administradora, usar
@@ -61,7 +65,7 @@ para estos tres pasos. Exportar a una carpeta nueva para no sobrescribir cambios
 | `digimon_aliases.csv` | Nombre alternativo y `species_id` |
 | `digimon_techniques.csv` | `id`, `name`, `spell_id`, etapa mínima, precio, habilitación |
 | `digimon_species_techniques.csv` | Qué `technique_id` puede usar cada `species_id` |
-| `digimon_evolution_rules.csv` | Origen, destino, nivel requerido y habilitación |
+| `digimon_evolution_edges.csv` | Origen, destino, nivel, habilitación, clasificación, fuente y confianza |
 
 Etapas: 1 Rookie, 2 Champion, 3 Ultimate, 4 Mega. Usar `enabled=0` mientras falten
 recursos. El validador requiere una plantilla real con la IA correcta antes de
@@ -92,13 +96,16 @@ especie, etapa, aspecto y estadísticas; se mantienen las técnicas aprendidas y
 se desequipan las que la nueva especie no admite. No se concede automáticamente
 una técnica nueva. El ajuste de nivel de administrador recorre las mismas reglas.
 
-Cada especie tiene una salida automática configurada; un salto de niveles puede
-recorrer varias reglas. Cada paso debe subir de etapa, lo que impide ciclos.
-Aplicar una regla a un compañero que ya supera el umbral ocurre en su siguiente
+Un salto de niveles puede recorrer varias reglas únicas. Cada paso debe subir de
+etapa, lo que impide ciclos. Aplicar una regla a un compañero que ya supera el umbral ocurre en su siguiente
 subida de nivel; no se cambian todas las colecciones al editar el catálogo.
-Las reglas no incorporan por ahora ramificaciones, objetos, requisitos de humano,
-pagos, evolución temporal ni reversión. La tabla `digimon_evolutions` de 0.3 sigue
-como diseño futuro inactivo: el motor actual usa `digimon_evolution_rules`.
+El grafo admite varias salidas y convergencias. Si varias salidas cumplen el nivel,
+la evolución automática espera una selección explícita. El Dispositivo y la ventana
+World Digimon ofrecen las ramas válidas; el servidor valida cada selección y guarda
+formas descubiertas e historial en las migraciones 009. Las formas descubiertas se
+pueden restaurar sin repetir el requisito de descubrimiento. Los Digimon admiten nivel
+1–100; el Tamer conserva su progresión independiente. Afinidades, misiones y
+catalizadores todavía no son requisitos ejecutables.
 
 ## Técnicas con nombre propio
 
