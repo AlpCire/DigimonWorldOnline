@@ -36,3 +36,15 @@ ID WDM, estado, evidencia, archivos afectados, tests y resultados, limitaciones,
 
 ## Fase vigente: G0
 Inventario real y auditoría antes de reescrituras. No se aprueban rediseños irreversibles ni monetización. Ver `docs/organizacion/G0_INVENTARIO.md` y `G0_BACKLOG.md`.
+
+## Ejecución multiagente nativa en Codex
+Este repositorio incluye `.codex/config.toml` y 24 archivos de roles en `.codex/agents/`. El **hilo principal de Codex** es el único orquestador. Usa los especialistas como subagentes reales solo si el trabajo tiene subproblemas independientes, con una tarea cerrada para cada uno.
+
+- Límite: máximo 4 subagentes simultáneos, no 24 procesos. Delegar 2-3 durante el piloto G0.
+- Delegar auditoría Tamer a `technical_director`, `sql_engineer` y `qa_lead`; usar `game_director` para criterio de experiencia, `product_manager` para backlog.
+- Los roles se cargan en clientes Codex locales compatibles desde `.codex/agents/` cuando el repositorio está confiado. NO son chats de ChatGPT y no trabajan sin una sesión/tarea iniciada.
+- En G0 la tarea piloto es estrictamente de **solo lectura del código**. Recorrer la rama Tamer `origin/feature/tamer-alpha-0.3` con `git show` o un worktree aislado; no editar ni fusionar.
+- Cuando un futuro ticket permita implementación, asigna a cada agente archivos/áreas sin solape, en su propia rama o worktree. QA revisa cambios ajenos.
+- Un subagente no aprueba releases; pedir autorización al CEO para merge, despliegue, publicación y operaciones de riesgo.
+- No permitir que los agentes generen a su vez otros árboles de tareas sin control. El principal resume resultados, divergencias, tests y siguientes tickets.
+- Piloto y comandos: `docs/organizacion/CODEX_AGENTES.md`.
