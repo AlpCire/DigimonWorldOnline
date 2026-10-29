@@ -1,40 +1,31 @@
-# Protocolo de comunicación entre los 24 chats
+# Protocolo de coordinación de subagentes Codex
 
-Los agentes son conversaciones consultables, no un equipo con comunicación automática. La coordinación ocurre mediante ticket, archivos versionados y HANDOFF explícito que el usuario o un orquestador compatible traslada.
+## Mecanismo
+El hilo principal de Codex actúa como Product Manager y orquestador. Puede iniciar subagentes especializados, enviarles instrucciones y esperar sus resultados **dentro de una tarea activa**. Los 24 archivos TOML definen roles disponibles; no son procesos permanentes ni 24 chats que se llamen solos. Issues, PR, ADR y este protocolo guardan el contexto entre tareas.
 
-## Plantilla
+## Asignación
+1. Registrar ID WDM, objetivo, rama y SHA de partida, propietario único, archivos o área, dependencias, criterio de aceptación y evidencia esperada.
+2. Delegar solo partes independientes. En G0: coordinador más `game_director`, `technical_director` y `qa_lead`, con un máximo inicial de tres subagentes simultáneos.
+3. El coordinador espera los tres resultados, resuelve divergencias, separa hechos de propuestas y registra una decisión o siguiente ticket. Un subagente no da por aprobada la tarea.
+4. En auditoría se trabaja en solo lectura. Para implementación posterior, un agente propietario por conjunto de archivos y una rama/worktree por flujo de escritura; no compartir el mismo checkout mutable ni editar archivos coincidentes a la vez.
+5. Integración: PR de borrador → evidencia de pruebas → revisión cruzada técnica/QA → decisión humana. No fusionar a `main`, desplegar, borrar datos ni publicar activos sin autorización explícita del CEO.
+
+## HANDOFF obligatorio
 ```text
 HANDOFF: WDM-###-H##
-ORIGEN: Agente NN / rol
-DESTINO: Agente NN / rol
+ORIGEN / DESTINO: rol e identificador de tarea
 ESTADO: PROPUESTA | BLOQUEADO | REVISIÓN | VERIFICADO
-OBJETIVO:
-ALCANCE DENTRO / FUERA:
-BASELINE: repo, rama, commit y archivos
-EVIDENCIA: rutas, logs, tests, capturas (o NO DISPONIBLE)
-DECISIONES APROBADAS: ADR y versión
-DEPENDENCIAS:
-INPUT:
-OUTPUT ESPERADO:
-CRITERIOS DE ACEPTACIÓN:
-RIESGOS / DERECHOS:
-RESPONSABLE DE APROBACIÓN:
+OBJETIVO / ALCANCE DENTRO Y FUERA:
+BASELINE: repositorio, rama, commit SHA, archivos
+EVIDENCIA: URL/ruta, comandos, entorno, fecha, resultado; o NO DISPONIBLE
+HALLAZGOS: HECHO VERIFICADO | DECLARACIÓN DOCUMENTADA | HIPÓTESIS | PROPUESTA
+DEPENDENCIAS / RIESGOS / DERECHOS:
+OUTPUT Y CRITERIOS DE ACEPTACIÓN:
+ARCHIVOS MODIFICADOS Y PRUEBAS EJECUTADAS:
+APROBACIÓN PENDIENTE / PRÓXIMA ACCIÓN:
 ```
 
-## Tareas en paralelo
-- Nunca dar a dos especialistas permisos para editar el mismo conjunto de archivos simultáneamente.
-- Para cada implementación: ticket → rama/worktree → PR → tests → revisión cruzada → decisión.
-- Prohibido fusionar a rama por defecto o sincronizada con publicación sin autorización explícita.
-- Los chats producen diseños y transferencias; Codex o humanos operan sobre código con las herramientas disponibles.
-- Las validaciones no son válidas sin resultados reproducibles.
-- Si falta permiso de uso de assets, detener cualquier empaquetado o redistribución de dichos assets.
-
 ## Handoff inicial G0-01
-ORIGEN: 02 Product Manager
-DESTINO: 04 Technical Director
-ESTADO: PROPUESTA
-OBJETIVO: revisar PR #1 Tamer y producir matriz de riesgos/compatibilidad sin tocar el código.
-BASELINE: `AlpCire/DigimonWorldOnline`, PR #1, rama `feature/tamer-alpha-0.3`, commit `b704e89b35d5c9d8c89aa0ef7a749d2bb84f9f34`.
-OUTPUT: hallazgos priorizados, mapa de dependencias, pruebas para reproducir, propuesta de integración.
-CRITERIO: todos los hallazgos enlazan archivos y diferencian prueba histórica de prueba nueva.
-APROBACIÓN: 02 + 22 para criterios técnicos; CEO para decisiones irreversibles.
+**Origen:** Product Manager. **Destino:** Technical Director. **Estado:** propuesta de auditoría. Revisar PR Tamer [#1](https://github.com/AlpCire/DigimonWorldOnline/pull/1) en `feature/tamer-alpha-0.3`, SHA `b704e89b35d5c9d8c89aa0ef7a749d2bb84f9f34`, sin tocar código. Entregar riesgos priorizados, mapa de dependencias y pruebas por reproducir. Distinguir resultados históricos de los ejecutados en la tarea. QA revisa criterios; el CEO decide integración o cambios irreversibles.
+
+El piloto de coordinación realizado el 29/10/2026 y sus límites están en [CODEX_AGENTES.md](CODEX_AGENTES.md).
