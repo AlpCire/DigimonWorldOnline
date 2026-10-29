@@ -40,8 +40,8 @@ Inventario real y auditoría antes de reescrituras. No se aprueban rediseños ir
 ## Ejecución multiagente nativa en Codex
 Este repositorio incluye `.codex/config.toml` y 24 archivos de roles en `.codex/agents/`. El **hilo principal de Codex** es el único orquestador. Usa los especialistas como subagentes reales solo si el trabajo tiene subproblemas independientes, con una tarea cerrada para cada uno.
 
-- Límite: máximo 4 subagentes simultáneos, no 24 procesos. Delegar 2-3 durante el piloto G0.
-- Delegar auditoría Tamer a `technical_director`, `sql_engineer` y `qa_lead`; usar `game_director` para criterio de experiencia, `product_manager` para backlog.
+- Límite inicial: coordinador principal y hasta 3 subagentes simultáneos. Los otros roles se invocan bajo demanda.
+- En el piloto G0 el hilo principal asume `product_manager` y delega en paralelo a `game_director`, `technical_director` y `qa_lead`. Invoca `sql_engineer` en una tarea posterior si el hallazgo SQL requiere análisis específico.
 - Los roles se cargan en clientes Codex locales compatibles desde `.codex/agents/` cuando el repositorio está confiado. NO son chats de ChatGPT y no trabajan sin una sesión/tarea iniciada.
 - En G0 la tarea piloto es estrictamente de **solo lectura del código**. Recorrer la rama Tamer `origin/feature/tamer-alpha-0.3` con `git show` o un worktree aislado; no editar ni fusionar.
 - Cuando un futuro ticket permita implementación, asigna a cada agente archivos/áreas sin solape, en su propia rama o worktree. QA revisa cambios ajenos.
